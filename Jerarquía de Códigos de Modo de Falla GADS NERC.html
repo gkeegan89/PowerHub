@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Jerarquía de Códigos de Modo de Falla GADS NERC</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .tree { list-style: none; padding-left: 20px; position: relative; }
+        .tree li { margin: 5px 0; position: relative; padding-left: 20px; list-style: none; }
+        .tree li:before { content: ""; position: absolute; top: 0; left: 10px; width: 1px; height: 100%; background-color: gray; }
+        .tree li span { cursor: pointer; padding: 5px; display: inline-block; }
+        .tree li span:hover { background-color: #f0f0f0; }
+        .tree li ul { display: none; padding-left: 20px; list-style: none; }
+        .tree li.active > ul { display: block; }
+        .icon { margin-right: 5px; }
+        .search-container { margin-bottom: 20px; }
+        .search-container input { width: 300px; padding: 10px; font-size: 16px; }
+        .search-results { margin-top: 10px; border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: auto; }
+        .search-results div { padding: 5px; cursor: pointer; }
+        .search-results div:hover { background-color: #f0f0f0; }
+    </style>
+</head>
+<body>
+<h2>Códigos de Modos de Falla GADS NERC</h1>
+<div class='search-container'>
+    <label for='search'>Buscar:</label>
+    <input type='text' id='search' placeholder='Ingrese número o texto...'>
+    <div class='search-results' id='searchResults'></div>
+</div>
+<ul class='tree' id='tree'>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>1 Falla para eventos tipo Salida Forzada Inmediata (U1)</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>T1, Desconexión de la red - unidad trippeada/disparada/parada - en servicio automático - solo eventos tipo U1 en servicio automático</span></li>
+        <li><span><span class='icon'>✔</span>T2, Desconexión de la red - unidad trippeada/disparada/parada - en servicio manual - solo eventos tipo U1 en servicio automático</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>2 Falla para eventos tipo Reducción de Potencia (Deratings)</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>82, Componente trippeada/disparada/parada - en servicio automático - solo tipos de eventos reducción</span></li>
+        <li><span><span class='icon'>✔</span>83, Componente trippeada/disparada/parada - en servicio manual - solo tipos de eventos reducción</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Agua</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>WC,  condición del agua - curso del río</span></li>
+        <li><span><span class='icon'>✔</span>D0,  inducción de agua (ingreso de agua a un lugar que no debe)</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Ambiental</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>E0,  restricción ambiental de emisiónes</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Combustión</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>R0,  fuego</span></li>
+        <li><span><span class='icon'>✔</span>46,  sin llama o apagado</span></li>
+        <li><span><span class='icon'>✔</span>FR,  relacionado con combustible</span></li>
+        <li><span><span class='icon'>✔</span>NF,  sin combustible</span></li>
+        <li><span><span class='icon'>✔</span>W0,  carbón mojado/congelado/debris</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Comportamiento errático</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>40,  errático - operación inexplicable</span></li>
+        <li><span><span class='icon'>✔</span>41,  errático - circuito</span></li>
+        <li><span><span class='icon'>✔</span>42,  errático - operario</span></li>
+        <li><span><span class='icon'>✔</span>43,  errático - cableado</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Comunes</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>06,  rotura</span></li>
+        <li><span><span class='icon'>✔</span>13,  cerrado</span></li>
+        <li><span><span class='icon'>✔</span>33, falla al desacoplar, no se logra desacoplar</span></li>
+        <li><span><span class='icon'>✔</span>34, falla al acoplar, no se logra acoplar</span></li>
+        <li><span><span class='icon'>✔</span>60,  defectos de material</span></li>
+        <li><span><span class='icon'>✔</span>63,  abierto</span></li>
+        <li><span><span class='icon'>✔</span>64,  sobrecarga</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Contaminación</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>10,  cubierto de carbón</span></li>
+        <li><span><span class='icon'>✔</span>17,  contaminado por líquidos</span></li>
+        <li><span><span class='icon'>✔</span>18,  contaminado por metales y sólidos</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Corrosión</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>22,  corrosión - cáustica</span></li>
+        <li><span><span class='icon'>✔</span>23,  corrosión - fatiga</span></li>
+        <li><span><span class='icon'>✔</span>21,  corrosión - general</span></li>
+        <li><span><span class='icon'>✔</span>24,  corrosión - ceniza de carbón a alta temperatura</span></li>
+        <li><span><span class='icon'>✔</span>25,  corrosión - ceniza de aceite a alta temperatura</span></li>
+        <li><span><span class='icon'>✔</span>26,  corrosión - baja temperatura</span></li>
+        <li><span><span class='icon'>✔</span>27,  corrosión - lado del fuego de la pared de agua</span></li>
+        <li><span><span class='icon'>✔</span>65,  pitting - (corrosión localizada)</span></li>
+        <li><span><span class='icon'>✔</span>73,  agrietamiento por corrosión </span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Desconocido</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>84,  desconocido - investigación en curso (cambiar este código una vez se determine el mecanismo de falla)</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Eléctrico</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>03,  arco/sobrecarga eléctrica</span></li>
+        <li><span><span class='icon'>✔</span>16,  desconexión o perdida de conexión</span></li>
+        <li><span><span class='icon'>✔</span>49,  componente eléctrico a tierra</span></li>
+        <li><span><span class='icon'>✔</span>50,  daño por hidrógeno</span></li>
+        <li><span><span class='icon'>✔</span>70,  componente eléctrico en cortocircuito</span></li>
+        <li><span><span class='icon'>✔</span>87,  voltaje fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>88,  contactos de relé soldados</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Erosión</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>39,  erosión - causa desconocida</span></li>
+        <li><span><span class='icon'>✔</span>35,  erosión - partícula de carbón</span></li>
+        <li><span><span class='icon'>✔</span>36,  erosión - escoria caída</span></li>
+        <li><span><span class='icon'>✔</span>38,  erosión - ceniza volante</span></li>
+        <li><span><span class='icon'>✔</span>37,  erosión - soplador de hollín</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Explosición</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>44,  daño por explosión - iniciado por el componente</span></li>
+        <li><span><span class='icon'>✔</span>45,  daño por explosión - no iniciado por el componente</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Externo</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>X0,  malfuncionamiento de equipo externo - fuera del control de gestión de la planta</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Físico</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>14,  condensación de aceite</span></li>
+        <li><span><span class='icon'>✔</span>15,  condensación de agua</span></li>
+        <li><span><span class='icon'>✔</span>32,  sucio - contaminación por aire</span></li>
+        <li><span><span class='icon'>✔</span>47,  formación de espuma</span></li>
+        <li><span><span class='icon'>✔</span>F0,  suciedad</span></li>
+        <li><span><span class='icon'>✔</span>72,  pegajoso</span></li>
+        <li><span><span class='icon'>✔</span>92,  borrado</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Humano</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>P0,  error de personal</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Incendio</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>07,  daños por incendio/quema - iniciados por el componente</span></li>
+        <li><span><span class='icon'>✔</span>08,  daños por incendio/quema - no iniciados por el componente</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Instrumentación</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>09,  calibración - fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>52,  indicación falsa</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Mantenimiento</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>C0,  limpieza</span></li>
+        <li><span><span class='icon'>✔</span>53,  inspección</span></li>
+        <li><span><span class='icon'>✔</span>58,  mantenimiento - daño por limpieza</span></li>
+        <li><span><span class='icon'>✔</span>59,  mantenimiento - general</span></li>
+        <li><span><span class='icon'>✔</span>61,  modificación(es)</span></li>
+        <li><span><span class='icon'>✔</span>U0,  piezas no disponibles</span></li>
+        <li><span><span class='icon'>✔</span>79,  pruebas</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Mecánico</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>01,  alineación/holgura fuera de los límites - Axial</span></li>
+        <li><span><span class='icon'>✔</span>02,  alineación/holgura fuera de los límites - Radial</span></li>
+        <li><span><span class='icon'>✔</span>04,  balance - fuera de los límites (desbalance)</span></li>
+        <li><span><span class='icon'>✔</span>05,  bloqueo rotación</span></li>
+        <li><span><span class='icon'>✔</span>12, obstruido (no permite el flujo)</span></li>
+        <li><span><span class='icon'>✔</span>28,  agrietado</span></li>
+        <li><span><span class='icon'>✔</span>30,  dañado - objeto extraño</span></li>
+        <li><span><span class='icon'>✔</span>31,  dañado - aislamiento</span></li>
+        <li><span><span class='icon'>✔</span>51,  daño por impacto</span></li>
+        <li><span><span class='icon'>✔</span>54,  fugas</span></li>
+        <li><span><span class='icon'>✔</span>55, perdido o suelto</span></li>
+        <li><span><span class='icon'>✔</span>56,  lubricación - excesiva</span></li>
+        <li><span><span class='icon'>✔</span>57,  lubricación - insuficiente</span></li>
+        <li><span><span class='icon'>✔</span>62,  ruidoso</span></li>
+        <li><span><span class='icon'>✔</span>66,  presión fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>67,  daño por roce dirección longitudinal</span></li>
+        <li><span><span class='icon'>✔</span>68,  daño secundario o consecuencia de otra falla</span></li>
+        <li><span><span class='icon'>✔</span>69,  atascado (sin movimiento)</span></li>
+        <li><span><span class='icon'>✔</span>81,  rasgado</span></li>
+        <li><span><span class='icon'>✔</span>V0,  vibración - (otra)</span></li>
+        <li><span><span class='icon'>✔</span>86,  fatiga por vibración que lleva a la falla</span></li>
+        <li><span><span class='icon'>✔</span>85,  vibración - fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>89,  falla de soldadura - soldadura rota</span></li>
+        <li><span><span class='icon'>✔</span>90,  falla de soldadura - metales disímiles</span></li>
+        <li><span><span class='icon'>✔</span>91,  falla de soldadura - defectos de soldadura</span></li>
+        <li><span><span class='icon'>✔</span>93,  desgaste - excesivo</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Químico</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>11,  daño por excursión química</span></li>
+        <li><span><span class='icon'>✔</span>A0,  restricción de sílice</span></li>
+        <li><span><span class='icon'>✔</span>S0,  formación de escoria</span></li>
+        <li><span><span class='icon'>✔</span>ST,  transferencia de vapor</span></li>
+    </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Térmico</span>
+    <ul>
+        <li><span><span class='icon'>✔</span>20,  enfriamiento por aire inadecuado</span></li>
+        <li><span><span class='icon'>✔</span>19,  enfriamiento por agua inadecuado</span></li>
+        <li><span><span class='icon'>✔</span>29,  creep por alta temperatura</span></li>
+        <li><span><span class='icon'>✔</span>48,  congelado - (relacionado con temperatura)</span></li>
+        <li><span><span class='icon'>✔</span>71,  sobrecalentamiento en poco tiempo</span></li>
+        <li><span><span class='icon'>✔</span>74,  temperatura - descarga del compresor fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>75,  temperatura - escape fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>78,  temperatura - general fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>H0,  temperatura - alta fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>76,  temperatura - aceite fuera de los límites</span></li>
+        <li><span><span class='icon'>✔</span>77,  temperatura - espaciadores de ruedas</span></li>
+        <li><span><span class='icon'>✔</span>80,  fatiga térmica</span></li>
+    </ul>
+    </li>
+</ul>
+<script>
+    function toggle(element) {
+        const parent = element.parentElement;
+        parent.classList.toggle("active");
+        const icon = element.querySelector(".icon");
+        if (parent.classList.contains("active")) {
+            icon.textContent = "▲";
+        } else {
+            icon.textContent = "▼";
+        }
+    }
+    
+    const searchInput = document.getElementById('search');
+    const searchResults = document.getElementById('searchResults');
+    const treeItems = document.querySelectorAll('.tree li span');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        searchResults.innerHTML = '';
+
+        if (searchTerm.length > 0) {
+            treeItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    const resultItem = document.createElement('div');
+                    resultItem.textContent = item.textContent;
+                    resultItem.addEventListener('click', () => {
+                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        item.parentElement.classList.add('active');
+                        item.parentElement.querySelectorAll('ul').forEach(ul => ul.style.display = 'block');
+                    });
+                    searchResults.appendChild(resultItem);
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

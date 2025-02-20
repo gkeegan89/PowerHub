@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Jerarquía de Tipos de Eventos GADS NERC</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .tree { list-style: none; padding-left: 20px; position: relative; }
+        .tree li { margin: 5px 0; position: relative; padding-left: 20px; list-style: none; }
+        .tree li:before { content: ""; position: absolute; top: 0; left: 10px; width: 1px; height: 100%; background-color: gray; }
+        .tree li span { cursor: pointer; padding: 5px; display: inline-block; }
+        .tree li span:hover { background-color: #f0f0f0; }
+        .tree li ul { display: none; padding-left: 20px; list-style: none; }
+        .tree li.active > ul { display: block; }
+        .icon { margin-right: 5px; }
+        .definition { margin-left: 20px; font-size: 0.9em; color: #555; }
+        .search-container { margin-bottom: 20px; }
+        .search-container input { width: 300px; padding: 10px; font-size: 16px; }
+        .search-results { margin-top: 10px; border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: auto; }
+        .search-results div { padding: 5px; cursor: pointer; }
+        .search-results div:hover { background-color: #f0f0f0; }
+    </style>
+</head>
+<body>
+<h2>Tipos de Eventos GADS NERC</h2>
+<div class='search-container'>
+    <label for='search'>Buscar:</label>
+    <input type='text' id='search' placeholder='Ingrese número o texto...'>
+    <div class='search-results' id='searchResults'></div>
+</div>
+<ul class='tree' id='tree'>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Unidad activa</span>
+        <ul>
+            <li><span onclick='toggle(this)'><span class='icon'>▼</span>Indisponible</span>
+                <ul>
+                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Salida forzada no planificada</span>
+                        <ul>
+                            <li>
+                                <span><span class='icon'>✔</span>U1, Salida Forzada Inmediata (Forced Outage - Immediate)</span>
+                                <div class='definition'>Evento que requiere retirar la unidad del servicio de manera inmediata debido a una falla crítica, como un disparo de relés de protección o una situación que comprometa la seguridad operativa. Este tipo de evento ocurre sin previo aviso ni planificación. Incluye eventos automáticos, como disparos iniciados por el operador en respuesta a alarmas de la unidad. Cuando se selecciona este tipo de evento luego se debe seleccionar de modo excluyente alguno de los siguiente códigos de causa:<br>T1: Tripped/shutdown grid separation (automático).<br>T2: Tripped/shutdown grid separation (manual).<br>84: Unknown – Investigación en curso (debe ser actualizado cuando se determine la causa).</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>U2, Salida Forzada Retrasada (Forced Outage - Delayed)</span>
+                                <div class='definition'>Una salida de servicio que no requiere la retirada inmediata de una unidad en estado operativo, pero que debe ejecutarse dentro de las próximas 6 horas. Este tipo de salida solo puede ocurrir mientras la unidad está en servicio.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>U3, Salida Forzada Pospuesta (Forced Outage - Postponed)</span>
+                                <div class='definition'>Una salida de servicio que puede posponerse más allá de las 6 horas, pero que requiere que la unidad sea retirada del estado operativo antes de los 5 días corridos.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>MO, Salida por Mantenimiento (Maintenance Outage)</span>
+                                <div class='definition'>Una salida de servicio que puede posponerse más allá de los 5 días corridos, pero que requiere que el generador sea retirado del servicio o reducido en capacidad (derated) antes de la próxima salida planificada (PO). Este tipo de salida puede ocurrir en cualquier momento del año, tiene una fecha de inicio flexible, puede o no tener una duración predefinida y suele ser mucho más corta que una salida planificada. Si no puede ser postergado más allá de 5 días, el evento se clasifica como U3.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>SF, Falla de Arranque (Startup Failure)</span>
+                                <div class='definition'>Evento que ocurre cuando una unidad no puede sincronizarse con el sistema dentro del tiempo especificado después de un intento de arranque. Generalmente está relacionado con problemas técnicos en el proceso de encendido. Notas importantes: 1) Varios fallos consecutivos en un mismo período de arranque se contabilizan como una sola falla o evento. 2) Errores procedimentales que no requieren reparación no se cuentan como falla de arranque, deben clasificar como U1. 3) Si una unidad no ha tenido un arranque exitoso en los últimos 30 días, se recomienda realizar un "test start". Este arranque no se cuenta en los indicadores de desempeño. 4) Si una unidad logra arrancar pero experimenta una reducción de carga forzada inmediatamente después, se registra como D1 en lugar de SF.</div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Salida forzada planificada</span>
+                        <ul>
+                            <li>
+                                <span><span class='icon'>✔</span>PO, Mantenimiento Planificado (Planned Outage)</span>
+                                <div class='definition'>Una salida de servicio que se programa con mucha antelación, tiene una duración predefinida, suele extenderse durante varias semanas y ocurre solo una o dos veces al año. Los mantenimientos mayores o inspecciones de turbinas y calderas son ejemplos típicos de salidas planificadas por mantenimiento.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>PE, Extensión de mantenimiento Planificado (Planned Outage Extension)</span>
+                                <div class='definition'>Extensión de un evento tipo PO más allá de su fecha de finalización estimada. Se utiliza únicamente en casos donde el alcance original del trabajo requiere más tiempo para completarse.</div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><span onclick='toggle(this)'><span class='icon'>▼</span>Disponible</span>
+                <ul>
+                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>En servicio con potencia reducida no planificada</span>
+                        <ul>
+                            <li>
+                                <span><span class='icon'>✔</span>D1, Reducción de Potencia Inmediata (Forced Derating - Immediate)</span>
+                                <div class='definition'>Reducción inmediata en la capacidad de generación de la unidad debido a problemas técnicos o fallas que afectan su operación.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>D2, Reducción de Potencia Retrasada (Forced Derating - Delayed)</span>
+                                <div class='definition'>Reducción de potencia que puede retrasarse temporalmente antes de su aplicación, mientras las condiciones de operación lo permitan.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>D3, Reducción de Potencia Pospuesta (Forced Derating - Postponed)</span>
+                                <div class='definition'>Reducción de potencia que se pospone hasta un momento operativo oportuno o cuando las condiciones lo permitan.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>D4, Reducción de Potencia por Mantenimiento (Maintenance Derating)</span>
+                                <div class='definition'>Reducción planificada de potencia debido a tareas de mantenimiento preventivo o correctivo.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>DM, Extensión de Reducción de Potencia por Mantenimiento (Maintenance Derating Extension)</span>
+                                <div class='definition'>Extensión de una reducción de potencia por mantenimiento más allá del período inicialmente planeado debido a trabajos adicionales o retrasos.</div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>En servicio con potencia reducida planificada</span>
+                        <ul>
+                            <li>
+                                <span><span class='icon'>✔</span>PD, Reducción de Potencia Planificada (Planned Derating)</span>
+                                <div class='definition'>Reducción programada con antelación, generalmente para realizar ajustes operativos o cumplir con requisitos de pruebas específicas.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>DP, Extensión de Reducción de Potencia Planificada (Planned Derating Extension)</span>
+                                <div class='definition'>Extensión de una reducción de potencia planificada más allá de la duración originalmente estimada debido a nuevas condiciones o retrasos en la ejecución.</div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>En servicio sin limitaciones</span>
+                        <ul>
+                            <li>
+                                <span><span class='icon'>✔</span>NC, No Limitante (Non-Curtailing)</span>
+                                <div class='definition'>Evento que indica que la unidad opera sin restricciones técnicas o limitaciones operativas, es decir, a plena capacidad.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>PU, Modo Bombeo (Pumping Mode)</span>
+                                <div class='definition'>Indica que la unidad está en modo de bombeo, como parte de operaciones de almacenamiento de energía o regulación de la red eléctrica.</div>
+                            </li>
+                            <li>
+                                <span><span class='icon'>✔</span>CO, Condiciones de Sincronización (Synchronous Cond)</span>
+                                <div class='definition'>La unidad está conectada al sistema eléctrico y funcionando en sincronía con otras unidades del sistema, pero no necesariamente generando.</div>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Reserva sin limitaciones</span>
+                        <ul>
+                            <li>
+                                <span><span class='icon'>✔</span>RS, Parada en Reserva (Reserve Shutdown)</span>
+                                <div class='definition'>Estado en el que la unidad no está generando energía, pero está disponible y lista para entrar en servicio si se requiere. Generalmente ocurre por falta de demanda o decisiones operativas, sin restricciones técnicas.</div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Unidad inactiva</span>
+        <ul>
+            <li><span onclick='toggle(this)'><span class='icon'>▼</span>Unidad inactiva</span>
+                <ul>
+                    <li>
+                        <span><span class='icon'>✔</span>IR, Reserva Inactiva (Inactive Reserve)</span>
+                        <div class='definition'>La unidad no está generando energía ni disponible para carga, pero permanece en reserva para ser reactivada si es necesario. Se diferencia de RS porque la unidad no puede ser activada inmediatamente; requiere intervención antes de entrar en servicio.</div>
+                    </li>
+                    <li>
+                        <span><span class='icon'>✔</span>RU, Retirada (Retired Unit)</span>
+                        <div class='definition'>La unidad ha sido retirada del servicio de manera permanente y no se planea que vuelva a operar.</div>
+                    </li>
+                    <li>
+                        <span><span class='icon'>✔</span>MB, Suspendida (Mothballed)</span>
+                        <div class='definition'>Unidad fuera de operación, pero no retirada permanentemente. Puede reactivarse en el futuro bajo condiciones específicas.</div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+<script>
+    function toggle(element) {
+        const parent = element.parentElement;
+        parent.classList.toggle("active");
+        const icon = element.querySelector(".icon");
+        if (parent.classList.contains("active")) {
+            icon.textContent = "▲";
+        } else {
+            icon.textContent = "▼";
+        }
+    }
+    
+    const searchInput = document.getElementById('search');
+    const searchResults = document.getElementById('searchResults');
+    const treeItems = document.querySelectorAll('.tree li span');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        searchResults.innerHTML = '';
+
+        if (searchTerm.length > 0) {
+            treeItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    const resultItem = document.createElement('div');
+                    resultItem.textContent = item.textContent;
+                    resultItem.addEventListener('click', () => {
+                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        item.parentElement.classList.add('active');
+                        item.parentElement.querySelectorAll('ul').forEach(ul => ul.style.display = 'block');
+                    });
+                    searchResults.appendChild(resultItem);
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

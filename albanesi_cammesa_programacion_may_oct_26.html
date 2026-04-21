@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Albanesi — Impacto Programación Estacional CAMMESA May–Oct 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0e1117;
+    --surface: #161b26;
+    --surface2: #1e2535;
+    --surface3: #252d3d;
+    --border: rgba(255,255,255,0.07);
+    --border-md: rgba(255,255,255,0.12);
+    --text: #e8ecf0;
+    --text-secondary: #8b96a8;
+    --text-tertiary: #555f70;
+    --accent: #3d8ef0;
+    --accent-glow: rgba(61,142,240,0.15);
+    --green: #2ecc8a;
+    --green-bg: rgba(46,204,138,0.08);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.08);
+    --red: #e05252;
+    --red-bg: rgba(224,82,82,0.08);
+    --blue: #3d8ef0;
+    --blue-bg: rgba(61,142,240,0.08);
+    --font-display: 'IBM Plex Sans Condensed', sans-serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* TOP HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(14,17,23,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .header-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  .header-sub {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+
+  .scenario-switcher {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  .scenario-btn {
+    padding: 6px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
+  .scenario-btn:hover { color: var(--text); background: var(--surface2); }
+
+  .scenario-btn.active-alto { background: var(--green); color: #0a1a12; }
+  .scenario-btn.active-medio { background: var(--accent); color: #fff; }
+  .scenario-btn.active-bajo { background: var(--red); color: #fff; }
+
+  .period-tabs {
+    display: flex; gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  .period-btn {
+    padding: 5px 14px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
+  .period-btn.active { background: var(--surface3); color: var(--text); }
+  .period-btn:hover:not(.active) { color: var(--text); }
+
+  /* MAIN LAYOUT */
+  .main { padding: 28px 32px; max-width: 1400px; }
+
+  /* SCENARIO BANNER */
+  .scenario-banner {
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid;
+    transition: all 0.3s ease;
+  }
+
+  .scenario-banner.alto { background: var(--green-bg); border-color: rgba(46,204,138,0.25); }
+  .scenario-banner.medio { background: var(--blue-bg); border-color: rgba(61,142,240,0.25); }
+  .scenario-banner.bajo { background: var(--red-bg); border-color: rgba(224,82,82,0.25); }
+
+  .banner-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+
+  .alto .banner-icon { background: rgba(46,204,138,0.15); }
+  .medio .banner-icon { background: rgba(61,142,240,0.15); }
+  .bajo .banner-icon { background: rgba(224,82,82,0.15); }
+
+  .banner-label {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .alto .banner-label { color: var(--green); }
+  .medio .banner-label { color: var(--accent); }
+  .bajo .banner-label { color: var(--red); }
+
+  .banner-desc { font-size: 12px; color: var(--text-secondary); }
+
+  /* SYSTEM METRICS */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    transition: border-color 0.3s ease;
+  }
+
+  .metric-card:hover { border-color: var(--border-md); }
+
+  .metric-label {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+  }
+
+  .metric-unit {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    margin-bottom: 6px;
+  }
+
+  .delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .delta-neg { background: var(--red-bg); color: var(--red); }
+  .delta-pos { background: var(--green-bg); color: var(--green); }
+  .delta-warn { background: var(--amber-bg); color: var(--amber); }
+  .delta-neu { background: var(--surface2); color: var(--text-secondary); }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    margin-top: 8px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* PLANT GRID */
+  .plant-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .plant-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .plant-card:hover {
+    border-color: var(--border-md);
+    transform: translateY(-1px);
+  }
+
+  .plant-card-header {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .plant-name {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .plant-units {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+  }
+
+  .plant-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .region-tag {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .tag-litoral { background: rgba(61,142,240,0.15); color: #69aaff; }
+  .tag-centro { background: rgba(46,204,138,0.12); color: #2ecc8a; }
+  .tag-noa { background: rgba(245,166,35,0.12); color: #f5a623; }
+  .tag-sur { background: rgba(99,186,255,0.12); color: #63baff; }
+  .tag-bsas { background: rgba(188,143,255,0.12); color: #bc8fff; }
+
+  .risk-badge {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .risk-low { background: var(--green-bg); color: var(--green); }
+  .risk-med { background: var(--amber-bg); color: var(--amber); }
+  .risk-high { background: var(--red-bg); color: var(--red); }
+
+  .plant-card-body { padding: 14px 16px; }
+
+  /* DISPATCH BAR */
+  .dispatch-section { margin-bottom: 12px; }
+
+  .dispatch-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+
+  .dispatch-text {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+
+  .dispatch-val {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    transition: color 0.3s ease;
+  }
+
+  .bar-track {
+    height: 5px;
+    background: var(--surface3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .bar-green { background: var(--green); }
+  .bar-amber { background: var(--amber); }
+  .bar-red { background: var(--red); }
+  .bar-blue { background: var(--accent); }
+
+  /* FACTORS */
+  .factors { display: flex; flex-direction: column; gap: 5px; }
+
+  .factor-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .factor-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .dot-g { background: var(--green); }
+  .dot-a { background: var(--amber); }
+  .dot-r { background: var(--red); }
+  .dot-b { background: var(--accent); }
+
+  /* FUEL TABLE */
+  .fuel-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .fuel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .fuel-name {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .fuel-price {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 3px;
+    transition: color 0.3s ease;
+  }
+
+  .fuel-unit {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+  }
+
+  .fuel-note {
+    font-size: 10px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  /* ALERT */
+  .alert {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    border: 1px solid;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .alert-warn { background: var(--amber-bg); border-color: rgba(245,166,35,0.2); color: #c8883a; }
+  .alert-info { background: var(--blue-bg); border-color: rgba(61,142,240,0.2); color: #6aa5f0; }
+  .alert-danger { background: var(--red-bg); border-color: rgba(224,82,82,0.2); color: #c06060; }
+  .alert-success { background: var(--green-bg); border-color: rgba(46,204,138,0.2); color: #2aaa76; }
+
+  .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* PRICE REFERENCE */
+  .price-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  .price-item-label {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .price-item-value {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .price-item-sub { font-size: 11px; color: var(--text-secondary); }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+  }
+
+  .footer-left { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); }
+  .footer-right { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); }
+
+  /* TRANSITION */
+  .fade-transition { transition: opacity 0.25s ease; }
+  .fade-out { opacity: 0; }
+
+  /* RESPONSIVE ADJUST */
+  @media (max-width: 1100px) {
+    .plant-grid { grid-template-columns: repeat(2, 1fr); }
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
+    .fuel-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 700px) {
+    .plant-grid { grid-template-columns: 1fr; }
+    .metrics-row { grid-template-columns: 1fr 1fr; }
+    .header { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
+    .main { padding: 20px 16px; }
+    .price-box { grid-template-columns: 1fr; }
+  }
+
+  /* ANIMATED VALUE */
+  @keyframes flashValue {
+    0% { opacity: 0.4; transform: scale(0.97); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .val-updated { animation: flashValue 0.35s ease forwards; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">GA</div>
+    <div>
+      <div class="header-title">Grupo Albanesi — Despacho May–Oct 2026</div>
+      <div class="header-sub">Programación Estacional Definitiva · CAMMESA · 14/04/2026</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <div class="period-tabs">
+      <button class="period-btn active" onclick="setPeriod('mayjul')" id="btn-mayjul">May–Jul</button>
+      <button class="period-btn" onclick="setPeriod('agooct')" id="btn-agooct">Ago–Oct</button>
+    </div>
+    <div class="scenario-switcher">
+      <button class="scenario-btn" onclick="setScenario('alto')" id="btn-alto">▲ Alto</button>
+      <button class="scenario-btn active-medio" onclick="setScenario('medio')" id="btn-medio">● Medio</button>
+      <button class="scenario-btn" onclick="setScenario('bajo')" id="btn-bajo">▼ Bajo</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- BANNER -->
+  <div class="scenario-banner medio" id="scenario-banner">
+    <div class="banner-icon">⚡</div>
+    <div>
+      <div class="banner-label" id="banner-label">Escenario Medio</div>
+      <div class="banner-desc" id="banner-desc">Crónicas medias Comahue · Importación térmica Brasil 1.100 MW medios · GNL según plan previsto</div>
+    </div>
+  </div>
+
+  <!-- SYSTEM METRICS -->
+  <div class="section-header">
+    <span class="section-title">Despacho sistémico CAMMESA</span>
+    <div class="section-line"></div>
+    <span id="period-label-header" style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);">MAY–JUL 2026</span>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-label">Despacho Térmico</div>
+      <div class="metric-value" id="m-termico">7.689</div>
+      <div class="metric-unit">MW medios</div>
+      <span class="delta" id="m-termico-delta" style=""></span>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Hidráulica Renovable</div>
+      <div class="metric-value" id="m-hid">4.654</div>
+      <div class="metric-unit">MW medios</div>
+      <span class="delta" id="m-hid-delta"></span>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Importación</div>
+      <div class="metric-value" id="m-imp">1.261</div>
+      <div class="metric-unit">MW medios</div>
+      <span class="delta" id="m-imp-delta"></span>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Renovables Ley 26190</div>
+      <div class="metric-value" id="m-ren">2.870</div>
+      <div class="metric-unit">MW medios</div>
+      <span class="delta" id="m-ren-delta"></span>
+    </div>
+  </div>
+
+  <!-- PRICE REFERENCE -->
+  <div class="price-box">
+    <div>
+      <div class="price-item-label">Precio Referencia Potencia</div>
+      <div class="price-item-value" id="p-pot">$9.233.506</div>
+      <div class="price-item-sub">$/MW-mes · Distribuidores</div>
+    </div>
+    <div>
+      <div class="price-item-label">Precio Est. Energía (PEE) Pico</div>
+      <div class="price-item-value" id="p-pico">$98.136</div>
+      <div class="price-item-sub">$/MWh · Demanda Distribuidores Residencial</div>
+    </div>
+    <div>
+      <div class="price-item-label">Tipo de Cambio Referencia</div>
+      <div class="price-item-value">$1.480</div>
+      <div class="price-item-sub">$/USD · May–Jul 2026</div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div id="alerts-container">
+    <!-- rendered by JS -->
+  </div>
+
+  <!-- PLANT CARDS -->
+  <div class="section-header" style="margin-top:8px;">
+    <span class="section-title">Impacto por unidad generadora</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="plant-grid" id="plant-grid">
+    <!-- rendered by JS -->
+  </div>
+
+  <!-- COMBUSTIBLES -->
+  <div class="section-header">
+    <span class="section-title">Combustibles — costos variables</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="fuel-grid" id="fuel-grid">
+    <!-- rendered by JS -->
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-left">Fuente: PE Definitiva CAMMESA Mayo–Octubre 2026 · 14/04/2026 · Elaborado por G. Albanesi O&amp;M Coordination</div>
+  <div class="footer-right" id="footer-scenario">Escenario activo: MEDIO · Periodo: MAY–JUL</div>
+</footer>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+
+const DISPATCH = {
+  mayjul: {
+    real: { termico: 8478, hid: 3751, nuclear: 1206, imp: 968, ren: 2747 },
+    alto:  { termico: 8014, hid: 4981, nuclear: 1069, imp: 1341, ren: 3066 },
+    medio: { termico: 7689, hid: 4654, nuclear: 1069, imp: 1261, ren: 2870 },
+    bajo:  { termico: 7453, hid: 4390, nuclear: 1069, imp: 1140, ren: 2680 },
+  },
+  agooct: {
+    real: { termico: 6874, hid: 3595, nuclear: 1263, imp: 489, ren: 3175 },
+    alto:  { termico: 7502, hid: 4602, nuclear: 938, imp: 635, ren: 3597 },
+    medio: { termico: 7101, hid: 4159, nuclear: 938, imp: 515, ren: 3458 },
+    bajo:  { termico: 6653, hid: 3686, nuclear: 938, imp: 415, ren: 3278 },
+  }
+};
+
+// Gas price per month (USD/MMBTU), for context
+const GAS_PRICES = {
+  mayjul: { nacional: 6.3, gnl: { jun: 9.5, jul: 8.9 } },
+  agooct: { nacional: 4.9, gnl: { ago: 8.2, sep: 4.9, oct: 3.1 } }
+};
+
+const FUEL = {
+  mayjul: {
+    gn:  { medio: 36.4, alto: 37.6, bajo: 34.9, unit: "Mm³/día", price: "6.3 USD/MMBTU prom.", priceSub: "GNL: hasta 20 USD/MMBTU en jul", delta: "-5% vs may-jul'25" },
+    fo:  { medio: 86,   alto: 153,  bajo: 55,   unit: "Miles Ton", price: "640 USD/Ton", priceSub: "↓ 8% vs año anterior", delta: "+8% vs may-jul'25" },
+    cm:  { medio: 199,  alto: 233,  bajo: 170,  unit: "Miles Ton", price: "188 USD/Ton", priceSub: "↓ 15% vs año anterior", delta: "+16% vs may-jul'25" },
+    go:  { medio: 146,  alto: 298,  bajo: 67,   unit: "Miles m³",  price: "924 USD/m³", priceSub: "↑ 23% vs año anterior — alto riesgo", delta: "-60% vs may-jul'25" },
+  },
+  agooct: {
+    gn:  { medio: 35.5, alto: 37.4, bajo: 33.1, unit: "Mm³/día", price: "4.9 USD/MMBTU prom.", priceSub: "GN local baja sep-oct: 3.1 USD/MMBTU", delta: "+1% vs ago-oct'25" },
+    fo:  { medio: 8,    alto: 23,   bajo: 2,    unit: "Miles Ton", price: "640 USD/Ton", priceSub: "↓ 13% vs año anterior", delta: "+408% vs ago-oct'25" },
+    cm:  { medio: 66,   alto: 86,   bajo: 47,   unit: "Miles Ton", price: "188 USD/Ton", priceSub: "↓ 15% vs año anterior", delta: "+559% vs ago-oct'25" },
+    go:  { medio: 5,    alto: 47,   bajo: 5,    unit: "Miles m³",  price: "924 USD/m³", priceSub: "↑ 12% vs año anterior", delta: "-54% vs ago-oct'25" },
+  }
+};
+
+// Plants definition — dispatch index: 0=bajo, 50=medio, 100=alto (relative to thermal scenario)
+const PLANTS = [
+  {
+    id: "arroyo",
+    name: "C.T. Arroyo Seco",
+    units: "ASECTG01 · ASECTG02 · DREYTV03",
+    mw: 122,
+    region: "Litoral",
+    regionTag: "tag-litoral",
+    contract: "Res. 287 (vigente sin venc.)",
+    contractStatus: "ok",
+    // dispatch index: how strongly this plant benefits/suffers from thermal scenario changes
+    // 100 = fully follows thermal (spot), 0 = fully protected (contracted)
+    // direction: 1 = better in alto, -1 = worse in alto (hydro displaces)
+    dispatchSensitivity: 15, // low — contracted
+    dispatchBase: { mayjul: 82, agooct: 80 }, // % utilization in medio
+    dispatchScenarioMod: { alto: +3, medio: 0, bajo: -3 }, // pp adjustment
+    riskBase: "low",
+    factors: {
+      mayjul: [
+        { dot: "g", text: "Contrato Res. 287 garantiza despacho base. Nuevo CC 2024, máxima eficiencia." },
+        { dot: "g", text: "Litoral: demanda +1.2% — contexto regional favorable." },
+        { dot: "a", text: "DREYTV03 habilitada jul'25: primer invierno pleno, posible ajuste operativo." },
+        { dot: "b", text: "Disponibilidad GN: 38.5 Mm³/día en mayo. Costo bajo respecto a GNL." }
+      ],
+      agooct: [
+        { dot: "g", text: "Contrato Res. 287 vigente. CC operando en régimen pleno." },
+        { dot: "g", text: "GN baja a 3.1 USD/MMBTU en oct: costos variables mínimos." },
+        { dot: "a", text: "Despacho térmico sistema sube +3% ago-oct: mayor espacio para térmica." }
+      ]
+    }
+  },
+  {
+    id: "timbues",
+    name: "C.T. Timbués",
+    units: "RENOTG01",
+    mw: 172,
+    region: "Litoral",
+    regionTag: "tag-litoral",
+    contract: "Res. 21 hasta feb'28",
+    contractStatus: "ok",
+    dispatchSensitivity: 30,
+    dispatchBase: { mayjul: 72, agooct: 75 },
+    dispatchScenarioMod: { alto: +4, medio: 0, bajo: -5 },
+    riskBase: "low",
+    factors: {
+      mayjul: [
+        { dot: "g", text: "Res. 21 hasta feb'28: ingresos de potencia asegurados." },
+        { dot: "g", text: "TG pesada SGT5-2000E: bajo costo variable con GN firma." },
+        { dot: "a", text: "GNL en junio-julio: 9.5–8.9 USD/MMBTU. Encarece si opera con GNL en pico." },
+        { dot: "a", text: "Importación térmica Brasil (1.100 MW medios): compite en horas de demanda media." }
+      ],
+      agooct: [
+        { dot: "g", text: "GN local baja a 4.9 USD/MMBTU prom. ago-oct: costos mejorados." },
+        { dot: "g", text: "Contrato Res. 21 activo. Despacho térmico sube +3% en el periodo." },
+        { dot: "a", text: "FO como respaldo: precio 640 USD/Ton. No conveniente como combustible principal." }
+      ]
+    }
+  },
+  {
+    id: "maranzana_cc",
+    name: "M. Maranzana CC",
+    units: "MMARTG06-08 + MMARTV09",
+    mw: 210,
+    region: "Centro",
+    regionTag: "tag-centro",
+    contract: "Res. 287 + Contrato 220 jun'27",
+    contractStatus: "ok",
+    dispatchSensitivity: 20,
+    dispatchBase: { mayjul: 78, agooct: 80 },
+    dispatchScenarioMod: { alto: +5, medio: 0, bajo: -4 },
+    riskBase: "low",
+    factors: {
+      mayjul: [
+        { dot: "g", text: "Región Centro: mayor crecimiento de demanda del país (+3.1%). Contexto óptimo." },
+        { dot: "g", text: "MMARTG08+TV09 habilitados en 2024: alta eficiencia, prioritarios en despacho." },
+        { dot: "g", text: "Contrato 220 y Res. 287 vigentes: potencia e ingreso garantizados." },
+        { dot: "a", text: "Invierno: despacho térmico -9% sistema. CC protegido por contratos pero menor energía." }
+      ],
+      agooct: [
+        { dot: "g", text: "Despacho térmico sube +3% en ago-oct: espacio adicional para unidades eficientes." },
+        { dot: "g", text: "Temperatura GN oct: 3.1 USD/MMBTU. Costos variables mínimos." },
+        { dot: "g", text: "TG06-07 Contrato 220 vigente hasta jun'27." }
+      ]
+    }
+  },
+  {
+    id: "maranzana_tg",
+    name: "M. Maranzana — TGs EP",
+    units: "MMARTG01-02 (CC) · MMARTG03-05",
+    mw: 189,
+    region: "Centro",
+    regionTag: "tag-centro",
+    contract: "Energía Plus / Autogenerador",
+    contractStatus: "warn",
+    dispatchSensitivity: 65,
+    dispatchBase: { mayjul: 55, agooct: 60 },
+    dispatchScenarioMod: { alto: +15, medio: 0, bajo: -18 },
+    riskBase: "med",
+    factors: {
+      mayjul: [
+        { dot: "a", text: "Sin contrato de mercado activo definido: despacho por costo marginal en spot." },
+        { dot: "a", text: "Caída despacho térmico -9% may-jul afecta directamente el orden de mérito de estas unidades." },
+        { dot: "g", text: "Centro +3.1% demanda: parcialmente mitiga la presión sistémica." },
+        { dot: "b", text: "TG01-02 con autocaldera de vapor: algo más eficiente que ciclo abierto puro." }
+      ],
+      agooct: [
+        { dot: "g", text: "Despacho térmico +3% ago-oct mejora el espacio de despacho en spot." },
+        { dot: "a", text: "Unidades FT8 (2008-2010): competitivas pero no nuevas. Costo variable moderado." },
+        { dot: "a", text: "Precios GN bajos en oct: margen estrecho en energía spot." }
+      ]
+    }
+  },
+  {
+    id: "independencia",
+    name: "C.T. Independencia",
+    units: "INDETG01-02 (contrato EDET) · TG03-04 Res.21",
+    mw: 214,
+    region: "NOA",
+    regionTag: "tag-noa",
+    contract: "TG01-02: contrato privado EDET · TG03-04: Res.21 '27-28",
+    contractStatus: "ok",
+    dispatchSensitivity: 35,
+    dispatchBase: { mayjul: 68, agooct: 65 },
+    dispatchScenarioMod: { alto: +8, medio: 0, bajo: -10 },
+    riskBase: "low",
+    factors: {
+      mayjul: [
+        { dot: "g", text: "TG01-02 FT8 SwiftPac: contrato privado con EDET (distribuidora Tucumán) con buen precio de energía. Protegidas del mercado spot." },
+        { dot: "g", text: "TG03-04 SGT-800: contratos Res. 21 vigentes hasta 2027-2028." },
+        { dot: "r", text: "Región NOA: única con caída de demanda proyectada -2.2%. Mercado spot ajustado." },
+        { dot: "a", text: "Posición geográfica alejada: costo de transporte de combustibles alternos (GO) muy alto." }
+      ],
+      agooct: [
+        { dot: "g", text: "Contratos privados EDET mantienen ingresos de TG01-02 independiente del despacho sistémico." },
+        { dot: "g", text: "Despacho térmico sistémico sube en ago-oct. Mejora contexto para TG03-04 en spot." },
+        { dot: "a", text: "NOA -2.2%: demanda regional no ayuda. La protección viene de los contratos." }
+      ]
+    }
+  },
+  {
+    id: "frias",
+    name: "C.T. Frías",
+    units: "FRIATG01",
+    mw: 60,
+    region: "NOA",
+    regionTag: "tag-noa",
+    contract: "Extensión Contrato 220 hasta jun'26 ⚠ / Incierto jul'26+",
+    contractStatus: "warn",
+    dispatchSensitivity: 75,
+    dispatchBase: { mayjul: 42, agooct: 35 },
+    dispatchScenarioMod: { alto: +12, medio: 0, bajo: -18 },
+    riskBase: "high",
+    factors: {
+      mayjul: [
+        { dot: "a", text: "Contrato 220 extendido hasta jun'26: mayo-junio cubiertos. A partir de julio: situación contractual a definir urgente." },
+        { dot: "r", text: "Si queda sin contrato desde jul'26: compite en spot en región con demanda -2.2%. Riesgo de despacho nulo." },
+        { dot: "a", text: "FT4000 SwiftPac 60 MW aeroderivada: eficiencia media-alta, competitiva con GN. Inviable con GO." },
+        { dot: "b", text: "Altitud 316 msnm: impacto moderado en potencia disponible (~5% reducción)." }
+      ],
+      agooct: [
+        { dot: "r", text: "A partir de julio estaría sin contrato: agosto-octubre sin cobertura contractual." },
+        { dot: "r", text: "NOA -2.2% demanda. Sin contrato en escenario bajo: riesgo de factor de planta muy bajo." },
+        { dot: "a", text: "Si se logra nuevo contrato: GN bajo en sep-oct (4.8-3.1 USD/MMBTU) favorece los costos." }
+      ]
+    }
+  },
+  {
+    id: "riojana",
+    name: "C.T. Riojana",
+    units: "LRIOTG21-23 (Fiat/GE) · LRIOTG24 (SGT-800)",
+    mw: 85,
+    region: "NOA",
+    regionTag: "tag-noa",
+    contract: "TG21-23: sin contrato · TG24: Contrato 220 may'27",
+    contractStatus: "warn",
+    dispatchSensitivity: 80,
+    dispatchBase: { mayjul: 35, agooct: 30 },
+    dispatchScenarioMod: { alto: +15, medio: 0, bajo: -20 },
+    riskBase: "high",
+    factors: {
+      mayjul: [
+        { dot: "r", text: "TG21-23 (turbinas Fiat TG16, 1978 y GE MS5001): alto costo variable, sin contrato. Solo despachan en punta extrema." },
+        { dot: "g", text: "LRIOTG24 SGT-800: Contrato 220 hasta may'27. Protegida en potencia." },
+        { dot: "r", text: "Gasoil 924 USD/m³ (+23%): si TG21-23 operan, costos muy elevados. Precio marginal alto." },
+        { dot: "r", text: "NOA -2.2%: demanda regional cae. Poca probabilidad de que TG21-23 sean despachadas en escenarios medio/bajo." }
+      ],
+      agooct: [
+        { dot: "g", text: "TG24: contrato activo, ingresos de potencia garantizados." },
+        { dot: "r", text: "TG21-23: sin contrato y con costos altos. Despacho sólo en escenario Alto con punta de demanda extrema." },
+        { dot: "a", text: "Altitud 515 msnm: mayor penalización de potencia que otras plantas." }
+      ]
+    }
+  },
+  {
+    id: "roca",
+    name: "C.T. Roca",
+    units: "ROCATG01 · ROCATV01",
+    mw: 188,
+    region: "Sur",
+    regionTag: "tag-sur",
+    contract: "Contrato 220 hasta ago'28",
+    contractStatus: "ok",
+    dispatchSensitivity: 50,
+    dispatchBase: { mayjul: 48, agooct: 52 },
+    dispatchScenarioMod: { alto: +10, medio: 0, bajo: -12 },
+    riskBase: "med",
+    factors: {
+      mayjul: [
+        { dot: "g", text: "Contrato 220 hasta ago'28: ingresos de potencia protegidos." },
+        { dot: "r", text: "Comahue hidráulica +24% may-jul: desplaza oferta térmica patagónica en el despacho de energía." },
+        { dot: "r", text: "Patagonia -2.6%: mayor caída de demanda del país. Contexto adverso para despacho de energía." },
+        { dot: "a", text: "ROCATG01 GEC PG-9171E (1994): unidad madura. Potencia nominal 133 MW." }
+      ],
+      agooct: [
+        { dot: "g", text: "Contrato 220 vigente. Potencia garantizada." },
+        { dot: "a", text: "Hidráulica persiste aunque baja respecto a may-jul. Mejora relativa para el despacho térmico." },
+        { dot: "a", text: "Despacho térmico +3% ago-oct: mayor espacio para la planta en spot." }
+      ]
+    }
+  },
+  {
+    id: "ezeiza",
+    name: "C.T. Ezeiza",
+    units: "EZEITG01-04 · EZEITV05-06",
+    mw: 289,
+    region: "Buenos Aires",
+    regionTag: "tag-bsas",
+    contract: "Res. 21/287 — múltiples hasta 2027-28",
+    contractStatus: "ok",
+    dispatchSensitivity: 20,
+    dispatchBase: { mayjul: 78, agooct: 80 },
+    dispatchScenarioMod: { alto: +5, medio: 0, bajo: -4 },
+    riskBase: "low",
+    factors: {
+      mayjul: [
+        { dot: "g", text: "6 unidades en 2 CCs: la mayor concentración de potencia contratada de Albanesi en BsAs." },
+        { dot: "g", text: "EZEITG04 (2023) + TV05-06 (2024): unidades nuevas, eficientes, despacho prioritario." },
+        { dot: "g", text: "Contratos Res. 21 y 287 activos: potencia + energía asegurada en distintos tramos." },
+        { dot: "a", text: "GBA -0.1%: demanda estancada, pero sin caída. Contexto neutral." }
+      ],
+      agooct: [
+        { dot: "g", text: "Despacho térmico +3% en ago-oct. Unidades nuevas son las primeras en ser despachadas." },
+        { dot: "g", text: "Precios GN bajos en oct: costos variables favorables para el CF." },
+        { dot: "b", text: "Importación Brasil puede competir en horas valle GBA. Sin impacto contractual pero sí en energía spot." }
+      ]
+    }
+  },
+  {
+    id: "solalban",
+    name: "Solalban",
+    units: "SOLATG01 · SOLATG02",
+    mw: 120,
+    region: "Buenos Aires",
+    regionTag: "tag-bsas",
+    contract: "Energía Plus (sin contrato activo definido)",
+    contractStatus: "warn",
+    dispatchSensitivity: 70,
+    dispatchBase: { mayjul: 52, agooct: 55 },
+    dispatchScenarioMod: { alto: +14, medio: 0, bajo: -18 },
+    riskBase: "med",
+    factors: {
+      mayjul: [
+        { dot: "a", text: "Energía Plus sin contrato activo: despacho íntegramente por precio marginal en spot." },
+        { dot: "g", text: "GN nacional en mayo: 4.8 USD/MMBTU — precio bajo, muy competitivo." },
+        { dot: "a", text: "GNL en junio-julio: encarece el costo variable significativamente (hasta 20 USD/MMBTU)." },
+        { dot: "a", text: "Importación Brasil 1.100 MW medios puede reducir espacio spot en GBA en horas de menor demanda." }
+      ],
+      agooct: [
+        { dot: "g", text: "GN baja en sep-oct: 4.9-3.1 USD/MMBTU. Costos variables favorables." },
+        { dot: "g", text: "Despacho térmico +3%: mayor espacio en spot." },
+        { dot: "a", text: "Sin respaldo contractual: ingresos completamente expuestos a variación de precio marginal." }
+      ]
+    }
+  }
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentScenario = 'medio';
+let currentPeriod = 'mayjul';
+
+// ─── SCENARIO CONFIG ──────────────────────────────────────────────────────────
+const SCENARIO_CONFIG = {
+  alto: {
+    label: "Escenario Alto",
+    icon: "🌊",
+    desc: "Mayor hidraulicidad Comahue · Importación máxima · Gas disponible. Térmica desplazada al mínimo en invierno.",
+    class: "alto",
+    btnClass: "active-alto"
+  },
+  medio: {
+    label: "Escenario Medio",
+    icon: "⚡",
+    desc: "Crónicas medias Comahue · Importación térmica Brasil 1.100 MW medios · GNL según plan previsto.",
+    class: "medio",
+    btnClass: "active-medio"
+  },
+  bajo: {
+    label: "Escenario Bajo",
+    icon: "🔥",
+    desc: "Menor hidraulicidad · Importación reducida · Mayor dependencia de térmica local. Máximo despacho térmico.",
+    class: "bajo",
+    btnClass: "active-bajo"
+  }
+};
+
+// ─── ALERTS PER SCENARIO / PERIOD ─────────────────────────────────────────────
+const ALERTS = {
+  mayjul: {
+    alto: [
+      { type: "alert-warn", icon: "⚠", text: "Escenario Alto: hidráulica Comahue en 4.981 MW medios (+33% vs año anterior). Las TGs sin contrato activo (Maranzana EP, Solalban, Frías post-jun) enfrentan el mayor riesgo de subdespacho." },
+      { type: "alert-info", icon: "ℹ", text: "En escenario Alto la importación sube a 1.341 MW medios desde Brasil y Uruguay. Esto ocupa espacio de despacho en GBA y Litoral, afectando Solalban y Timbués en horas valle." }
+    ],
+    medio: [
+      { type: "alert-warn", icon: "⚠", text: "Despacho térmico -9% vs may-jul'25 en escenario medio. Unidades sin contratos vigentes (Maranzana TGs EP, Solalban, Frías post-jun, Riojana TG21-23) expuestas a menor factor de planta." },
+      { type: "alert-info", icon: "ℹ", text: "Frías: contrato 220 cubre mayo-junio. La renovación contractual para jul-oct es la acción prioritaria del periodo." }
+    ],
+    bajo: [
+      { type: "alert-success", icon: "✓", text: "Escenario Bajo: térmica local necesaria — 7.453 MW medios. Mayor factor de planta para todas las unidades, especialmente las sin contrato." },
+      { type: "alert-warn", icon: "⚠", text: "Gasoil 924 USD/m³: en escenario bajo Riojana TG21-23 podrían despachar más horas pero con costos muy elevados. Rentabilidad a monitorear." }
+    ]
+  },
+  agooct: {
+    alto: [
+      { type: "alert-warn", icon: "⚠", text: "Escenario Alto ago-oct: hidráulica 4.602 MW medios (+28% vs año anterior). Continúa la presión sobre térmica. Roca queda expuesta en energía pese a contrato de potencia." },
+      { type: "alert-info", icon: "ℹ", text: "Nuclear cae a 938 MW medios (-26%): da algo más de espacio a la térmica respecto al periodo anterior." }
+    ],
+    medio: [
+      { type: "alert-success", icon: "✓", text: "Despacho térmico +3% en ago-oct (7.101 MW medios) vs año anterior. Mejora el contexto para todas las plantas térmicas respecto al trimestre anterior." },
+      { type: "alert-warn", icon: "⚠", text: "Frías sin contrato en ago-oct (si no se renueva): compite en spot en NOA -2.2% de demanda. Riesgo de despacho muy bajo sin cobertura." }
+    ],
+    bajo: [
+      { type: "alert-success", icon: "✓", text: "Escenario Bajo: térmica en 6.653 MW medios — superior al real de ago-oct'25 (6.874 MW). Contexto muy favorable para factor de planta de todas las unidades." },
+      { type: "alert-info", icon: "ℹ", text: "GN octubre: 3.1 USD/MMBTU en escenario base (nacional). Menor costo de combustible del semestre — favorece margen variable." }
+    ]
+  }
+};
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+
+function getRiskForScenario(plant) {
+  const base = plant.riskBase;
+  const sens = plant.dispatchSensitivity;
+  if (currentScenario === 'alto') {
+    // Higher hydro displaces thermal → worse for spot plants
+    if (sens >= 65) return 'high';
+    if (sens >= 40) return 'med';
+    return base;
+  } else if (currentScenario === 'bajo') {
+    // Less hydro → more thermal dispatch → better for all
+    if (base === 'high' && sens >= 70) return 'med';
+    if (base === 'high' && sens < 70) return 'med';
+    if (base === 'med') return 'low';
+    return 'low';
+  }
+  return base;
+}
+
+function getDispatch(plant) {
+  const base = plant.dispatchBase[currentPeriod];
+  const mod = plant.dispatchScenarioMod[currentScenario];
+  // For alto scenario, high hydro hurts spot thermal
+  let val;
+  if (currentScenario === 'alto') {
+    val = base - (plant.dispatchSensitivity * 0.25);
+  } else if (currentScenario === 'bajo') {
+    val = base + (plant.dispatchSensitivity * 0.22);
+  } else {
+    val = base;
+  }
+  return Math.max(10, Math.min(98, Math.round(val)));
+}
+
+function getBarColor(pct, risk) {
+  if (risk === 'high' || pct < 40) return 'bar-red';
+  if (risk === 'med' || pct < 60) return 'bar-amber';
+  return 'bar-green';
+}
+
+function getRiskLabel(risk) {
+  if (risk === 'high') return ['risk-high', 'Riesgo alto'];
+  if (risk === 'med') return ['risk-med', 'Riesgo medio'];
+  return ['risk-low', 'Riesgo bajo'];
+}
+
+function renderPlants() {
+  const grid = document.getElementById('plant-grid');
+  grid.innerHTML = '';
+
+  PLANTS.forEach(plant => {
+    const dispPct = getDispatch(plant);
+    const risk = getRiskForScenario(plant);
+    const [riskClass, riskLabel] = getRiskLabel(risk);
+    const barColor = getBarColor(dispPct, risk);
+    const factors = plant.factors[currentPeriod];
+
+    const contractColor = plant.contractStatus === 'ok'
+      ? 'color:var(--green)'
+      : plant.contractStatus === 'warn'
+        ? 'color:var(--amber)'
+        : 'color:var(--red)';
+
+    const card = document.createElement('div');
+    card.className = 'plant-card';
+    card.innerHTML = `
+      <div class="plant-card-header">
+        <div>
+          <div class="plant-name">${plant.name}</div>
+          <div class="plant-units">${plant.units} · ${plant.mw} MW</div>
+        </div>
+        <div class="plant-meta">
+          <span class="region-tag ${plant.regionTag}">${plant.region}</span>
+          <span class="risk-badge ${riskClass}">${riskLabel}</span>
+        </div>
+      </div>
+      <div class="plant-card-body">
+        <div class="dispatch-section">
+          <div class="dispatch-label">
+            <span class="dispatch-text">FACTOR DESPACHO EST.</span>
+            <span class="dispatch-val val-updated">${dispPct}%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${barColor}" style="width:${dispPct}%"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;padding-top:2px;">
+          <span style="font-size:10px;font-family:var(--font-mono);${contractColor};">▸ ${plant.contract}</span>
+        </div>
+        <div class="factors">
+          ${factors.map(f => `
+            <div class="factor-row">
+              <div class="factor-dot dot-${f.dot}"></div>
+              <span>${f.text}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderMetrics() {
+  const d = DISPATCH[currentPeriod];
+  const real = d.real;
+  const scen = d[currentScenario];
+
+  const deltaTermico = Math.round((scen.termico - real.termico) / real.termico * 100);
+  const deltaHid = Math.round((scen.hid - real.hid) / real.hid * 100);
+  const deltaImp = Math.round((scen.imp - real.imp) / real.imp * 100);
+  const deltaRen = Math.round((scen.ren - real.ren) / real.ren * 100);
+
+  const fmtDelta = (v, id) => {
+    const cls = v > 0 ? 'delta-pos' : v < 0 ? 'delta-neg' : 'delta-neu';
+    const sign = v > 0 ? '+' : '';
+    document.getElementById(id).className = `delta ${cls}`;
+    document.getElementById(id).textContent = `${sign}${v}% vs año ant.`;
+  };
+
+  animateValue('m-termico', scen.termico.toLocaleString('es-AR'));
+  animateValue('m-hid', scen.hid.toLocaleString('es-AR'));
+  animateValue('m-imp', scen.imp.toLocaleString('es-AR'));
+  animateValue('m-ren', scen.ren.toLocaleString('es-AR'));
+
+  fmtDelta(deltaTermico, 'm-termico-delta');
+  fmtDelta(deltaHid, 'm-hid-delta');
+  fmtDelta(deltaImp, 'm-imp-delta');
+  fmtDelta(deltaRen, 'm-ren-delta');
+
+  // Color metric value based on scenario impact on thermal
+  const termEl = document.getElementById('m-termico');
+  if (currentScenario === 'bajo') termEl.style.color = 'var(--green)';
+  else if (currentScenario === 'alto') termEl.style.color = 'var(--red)';
+  else termEl.style.color = 'var(--accent)';
+}
+
+function renderFuels() {
+  const grid = document.getElementById('fuel-grid');
+  const fuels = FUEL[currentPeriod];
+  const fuelDefs = [
+    { key: 'gn', name: 'Gas Natural', color: 'var(--accent)' },
+    { key: 'fo', name: 'Fuel Oil', color: 'var(--amber)' },
+    { key: 'cm', name: 'Carbón Mineral', color: '#888' },
+    { key: 'go', name: 'Gasoil', color: 'var(--red)' }
+  ];
+
+  grid.innerHTML = fuelDefs.map(fd => {
+    const f = fuels[fd.key];
+    const vol = f[currentScenario] !== undefined ? f[currentScenario] : f.medio;
+    return `
+      <div class="fuel-card">
+        <div class="fuel-name">${fd.name}</div>
+        <div class="fuel-price" style="color:${fd.color}">${vol.toLocaleString('es-AR')}</div>
+        <div class="fuel-unit">${f.unit} · Escenario ${currentScenario}</div>
+        <div style="height:1px;background:var(--border);margin:8px 0;"></div>
+        <div class="fuel-note"><strong style="color:var(--text);">${f.price}</strong><br>${f.priceSub}</div>
+        <div style="margin-top:6px;"><span class="delta delta-neu" style="font-size:10px;">${f.delta}</span></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAlerts() {
+  const container = document.getElementById('alerts-container');
+  const alerts = ALERTS[currentPeriod][currentScenario] || [];
+  container.innerHTML = alerts.map(a => `
+    <div class="alert ${a.type}">
+      <span class="alert-icon">${a.icon}</span>
+      <span>${a.text}</span>
+    </div>
+  `).join('');
+}
+
+function renderBanner() {
+  const cfg = SCENARIO_CONFIG[currentScenario];
+  const banner = document.getElementById('scenario-banner');
+  banner.className = `scenario-banner ${cfg.class}`;
+  document.getElementById('banner-label').textContent = cfg.label;
+  document.getElementById('banner-desc').textContent = cfg.desc;
+  banner.querySelector('.banner-icon').textContent = cfg.icon;
+}
+
+function renderPrices() {
+  const period = currentPeriod;
+  if (period === 'mayjul') {
+    document.getElementById('p-pot').textContent = '$9.233.506';
+    document.getElementById('p-pico').textContent = '$98.136';
+  } else {
+    document.getElementById('p-pot').textContent = '$8.846.232';
+    document.getElementById('p-pico').textContent = '$83.051';
+  }
+}
+
+function animateValue(id, newVal) {
+  const el = document.getElementById(id);
+  el.classList.remove('val-updated');
+  void el.offsetWidth;
+  el.textContent = newVal;
+  el.classList.add('val-updated');
+}
+
+function renderAll() {
+  renderBanner();
+  renderMetrics();
+  renderAlerts();
+  renderPlants();
+  renderFuels();
+  renderPrices();
+
+  const periodText = currentPeriod === 'mayjul' ? 'MAY–JUL' : 'AGO–OCT';
+  document.getElementById('period-label-header').textContent = `${periodText} 2026`;
+  document.getElementById('footer-scenario').textContent = `Escenario activo: ${currentScenario.toUpperCase()} · Periodo: ${periodText}`;
+}
+
+// ─── CONTROLS ─────────────────────────────────────────────────────────────────
+
+function setScenario(s) {
+  currentScenario = s;
+  ['alto', 'medio', 'bajo'].forEach(x => {
+    const btn = document.getElementById('btn-' + x);
+    btn.className = 'scenario-btn' + (x === s ? ` ${SCENARIO_CONFIG[x].btnClass}` : '');
+  });
+  renderAll();
+}
+
+function setPeriod(p) {
+  currentPeriod = p;
+  document.getElementById('btn-mayjul').className = 'period-btn' + (p === 'mayjul' ? ' active' : '');
+  document.getElementById('btn-agooct').className = 'period-btn' + (p === 'agooct' ? ' active' : '');
+  renderAll();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>

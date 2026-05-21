@@ -1,200 +1,1113 @@
 <!DOCTYPE html>
-<html lang='es'>
+<html lang="es">
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Jerarquía de Tipos de Eventos GADS NERC</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .tree { list-style: none; padding-left: 20px; position: relative; }
-        .tree li { margin: 5px 0; position: relative; padding-left: 20px; list-style: none; }
-        .tree li:before { content: ""; position: absolute; top: 0; left: 10px; width: 1px; height: 100%; background-color: gray; }
-        .tree li span { cursor: pointer; padding: 5px; display: inline-block; }
-        .tree li span:hover { background-color: #f0f0f0; }
-        .tree li ul { display: none; padding-left: 20px; list-style: none; }
-        .tree li.active > ul { display: block; }
-        .icon { margin-right: 5px; }
-        .definition { margin-left: 20px; font-size: 0.9em; color: #555; }
-        .search-container { margin-bottom: 20px; }
-        .search-container input { width: 300px; padding: 10px; font-size: 16px; }
-        .search-results { margin-top: 10px; border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: auto; }
-        .search-results div { padding: 5px; cursor: pointer; }
-        .search-results div:hover { background-color: #f0f0f0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tipos de Eventos GADS NERC</title>
+<style>
+  /* =========================================================
+     GADS NERC — Tipos de eventos
+     Formato PowerHub / SharePoint iframe. Sin dependencias externas.
+     ========================================================= */
+
+  :root {
+    --bg:            #ffffff;
+    --bg-subtle:     #f6f8fb;
+    --bg-hover:      #eef2f8;
+    --border:        #dde3eb;
+    --border-strong: #c4cdda;
+    --fg:            #1a1d21;
+    --fg-muted:      #5b6470;
+    --fg-faint:      #8a93a0;
+    --accent:        #1f5fa8;
+    --accent-soft:   #e8f0fb;
+    --accent-strong: #134a8a;
+    --code-bg:       #eef2f7;
+    --code-fg:       #134a8a;
+    --success:       #1a7a3f;
+    --shadow-md:     0 4px 12px rgba(20, 30, 50, 0.08);
+    --radius:        6px;
+    --mono:          ui-monospace, "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
+    --sans:          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body { padding: 16px; }
+
+  .app-header {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--fg);
+  }
+
+  .app-header p {
+    margin: 4px 0 0;
+    color: var(--fg-muted);
+    font-size: 12px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    align-items: stretch;
+    height: calc(100vh - 92px);
+    min-height: 440px;
+  }
+
+  .layout > main,
+  .layout > .side-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  @media (max-width: 860px) {
+    .layout {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+    .side-panel { order: -1; }
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    padding: 8px 32px 8px 32px;
+    font-size: 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--bg);
+    font-family: inherit;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  .search-wrap input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--fg-faint);
+    pointer-events: none;
+  }
+
+  .clear-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--fg-faint);
+    padding: 4px 6px;
+    font-size: 16px;
+    line-height: 1;
+    border-radius: 4px;
+    display: none;
+  }
+
+  .search-wrap.has-value .clear-btn { display: block; }
+  .clear-btn:hover { background: var(--bg-hover); color: var(--fg); }
+
+  .btn {
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--fg);
+    font-family: inherit;
+    transition: background .12s, border-color .12s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: var(--bg-hover); }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+
+  .nav-crumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+    min-height: 32px;
+  }
+
+  .nav-label {
+    color: var(--fg-faint);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-size: 10px;
+    margin-right: 4px;
+  }
+
+  .nav-crumb {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .nav-crumb:hover { background: var(--accent-soft); text-decoration: underline; }
+  .nav-crumb.current { color: var(--fg); font-weight: 600; cursor: default; }
+  .nav-crumb.current:hover { background: none; text-decoration: none; }
+  .nav-sep { color: var(--fg-faint); font-size: 11px; }
+  .nav-empty { color: var(--fg-faint); font-style: italic; }
+
+  .search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    max-height: 290px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+  }
+
+  .search-results.open { display: block; }
+
+  .search-result {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .search-result:last-child { border-bottom: none; }
+  .search-result:hover, .search-result.active { background: var(--accent-soft); }
+
+  .sr-code {
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--code-fg);
+    margin-right: 8px;
+  }
+
+  .sr-text { color: var(--fg); }
+  .sr-path { display: block; font-size: 11px; color: var(--fg-faint); margin-top: 2px; }
+  .search-empty { padding: 12px; text-align: center; color: var(--fg-faint); font-size: 12px; }
+
+  mark {
+    background: #fff3a8;
+    color: inherit;
+    padding: 0 1px;
+    border-radius: 2px;
+  }
+
+  .tree, .tree ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tree {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .tree ul {
+    margin-left: 14px;
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+    display: none;
+  }
+
+  .tree li.open > ul { display: block; }
+  .tree li { margin: 1px 0; }
+  .tree.searching li.hidden { display: none; }
+  .tree.searching li.match-path > .node { background: var(--accent-soft); }
+
+  .node {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .1s;
+    color: var(--fg);
+  }
+
+  .node:hover { background: var(--bg-hover); }
+  .node:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    color: var(--fg-faint);
+    transition: transform .15s;
+    flex-shrink: 0;
+  }
+
+  .tree li.open > .node .chevron { transform: rotate(90deg); }
+  .chevron svg { width: 10px; height: 10px; }
+
+  .node-icon {
+    flex-shrink: 0;
+    color: var(--fg-muted);
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .node-icon svg { width: 14px; height: 14px; }
+  .node.is-folder .node-icon { color: var(--accent); }
+  .node.is-leaf .node-icon { color: var(--fg-faint); }
+
+  .node-label { font-size: 13px; color: var(--fg); }
+  .node.is-folder > .node-label { font-weight: 500; }
+  .node.lvl-1 > .node-label { font-weight: 600; font-size: 14px; }
+  .node.lvl-2 > .node-label { font-weight: 600; }
+
+  /* Paleta por categoría: en carpetas solo colorea el icono.
+     El texto de carpetas queda negro. En códigos hijo: chip claro visible,
+     fondo claro al hover y chip oscuro al seleccionar. */
+  .node.cat-red.is-folder .node-icon { color: #c62828; }
+  .node.cat-orange.is-folder .node-icon { color: #ef7d00; }
+  .node.cat-violet.is-folder .node-icon { color: #6f42c1; }
+  .node.cat-green-dark.is-folder .node-icon { color: #1b5e20; }
+  .node.cat-green-light.is-folder .node-icon { color: #7cb342; }
+  .node.cat-gray.is-folder .node-icon { color: #6b7280; }
+
+  .node.cat-red.is-folder .node-label,
+  .node.cat-orange.is-folder .node-label,
+  .node.cat-violet.is-folder .node-label,
+  .node.cat-green-dark.is-folder .node-label,
+  .node.cat-green-light.is-folder .node-label,
+  .node.cat-gray.is-folder .node-label { color: var(--fg); }
+
+  .leaf.cat-red .code-chip { color: #c62828; background: #fff1f1; }
+  .leaf.cat-red:hover { background: #fff1f1; }
+  .leaf.cat-red.selected { background: #fff1f1 !important; box-shadow: inset 2px 0 0 #c62828; }
+  .leaf.cat-red.selected .code-chip { background: #c62828; color: white; }
+
+  .leaf.cat-orange .code-chip { color: #ef7d00; background: #fff4e6; }
+  .leaf.cat-orange:hover { background: #fff4e6; }
+  .leaf.cat-orange.selected { background: #fff4e6 !important; box-shadow: inset 2px 0 0 #ef7d00; }
+  .leaf.cat-orange.selected .code-chip { background: #ef7d00; color: white; }
+
+  .leaf.cat-violet .code-chip { color: #6f42c1; background: #f4efff; }
+  .leaf.cat-violet:hover { background: #f4efff; }
+  .leaf.cat-violet.selected { background: #f4efff !important; box-shadow: inset 2px 0 0 #6f42c1; }
+  .leaf.cat-violet.selected .code-chip { background: #6f42c1; color: white; }
+
+  .leaf.cat-green-dark .code-chip { color: #1b5e20; background: #eef7f1; }
+  .leaf.cat-green-dark:hover { background: #eef7f1; }
+  .leaf.cat-green-dark.selected { background: #eef7f1 !important; box-shadow: inset 2px 0 0 #1b5e20; }
+  .leaf.cat-green-dark.selected .code-chip { background: #1b5e20; color: white; }
+
+  .leaf.cat-green-light .code-chip { color: #5f8f2d; background: #f1fae8; }
+  .leaf.cat-green-light:hover { background: #f1fae8; }
+  .leaf.cat-green-light.selected { background: #f1fae8 !important; box-shadow: inset 2px 0 0 #7cb342; }
+  .leaf.cat-green-light.selected .code-chip { background: #7cb342; color: white; }
+
+  .leaf.cat-gray .code-chip { color: #4b5563; background: #f3f4f6; }
+  .leaf.cat-gray:hover { background: #f3f4f6; }
+  .leaf.cat-gray.selected { background: #f3f4f6 !important; box-shadow: inset 2px 0 0 #6b7280; }
+  .leaf.cat-gray.selected .code-chip { background: #6b7280; color: white; }
+
+  .node-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--fg-faint);
+    background: var(--bg-subtle);
+    border-radius: 10px;
+    padding: 1px 7px;
+  }
+
+  .leaf .code-chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--code-fg);
+    background: var(--code-bg);
+    border-radius: 3px;
+    padding: 1px 7px;
+    flex-shrink: 0;
+  }
+
+  .leaf .leaf-desc { font-size: 13px; color: var(--fg); }
+  .leaf .leaf-en { font-size: 11px; color: var(--fg-faint); margin-left: 4px; font-style: italic; }
+  .leaf.selected { background: var(--accent-soft) !important; box-shadow: inset 2px 0 0 var(--accent); }
+  .leaf.selected .code-chip { background: var(--accent); color: white; }
+
+  .side-panel {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--fg-muted);
+    margin: 0 0 8px;
+  }
+
+  .panel-section.selection { flex: 0 0 auto; display: flex; flex-direction: column; }
+  .panel-section.recents {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .selection-empty, .recent-empty { color: var(--fg-faint); font-size: 13px; font-style: italic; }
+
+  .selection-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+  }
+
+  .sel-code {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--code-fg);
+    margin-bottom: 4px;
+  }
+
+  .sel-desc { font-size: 13px; color: var(--fg); line-height: 1.4; margin-bottom: 8px; font-weight: 600; }
+  .sel-en { font-size: 12px; color: var(--fg-muted); font-style: italic; margin-bottom: 10px; }
+
+  .sel-definition {
+    font-size: 12px;
+    color: var(--fg-muted);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 10px;
+    max-height: 210px;
+    overflow-y: auto;
+  }
+
+  .copy-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .copy-feedback { font-size: 11px; color: var(--success); margin-top: 6px; opacity: 0; transition: opacity .15s; }
+  .copy-feedback.show { opacity: 1; }
+
+  .recent-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .recent-list li button {
+    width: 100%;
+    text-align: left;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .1s;
+  }
+
+  .recent-list li button:hover { background: var(--bg-hover); }
+  .rc-code { font-family: var(--mono); font-weight: 700; color: var(--code-fg); flex-shrink: 0; }
+  .rc-desc { color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
 </head>
 <body>
-<h2>Tipos de Eventos GADS NERC</h2>
-<div class='search-container'>
-    <label for='search'>Buscar:</label>
-    <input type='text' id='search' placeholder='Ingrese número o texto...'>
-    <div class='search-results' id='searchResults'></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-chevron" viewBox="0 0 10 10">
+      <path d="M3 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-folder" viewBox="0 0 16 16">
+      <path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-tag" viewBox="0 0 16 16">
+      <path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <circle cx="10" cy="6" r="1" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="app-header">
+  <h1>Tipos de Eventos GADS NERC</h1>
+  
+</header>
+
+<div class="layout">
+  <main>
+    <div class="toolbar">
+      <div class="search-wrap" id="searchWrap">
+        <span class="search-icon" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <input type="text" id="search" placeholder="Buscar por código o descripción (ej. U1, falla, reducción, reserva)" autocomplete="off">
+        <button class="clear-btn" id="clearBtn" aria-label="Limpiar búsqueda">×</button>
+        <div class="search-results" id="searchResults" role="listbox"></div>
+      </div>
+
+      <button class="btn" id="expandAll" type="button">Expandir todo</button>
+      <button class="btn" id="collapseAll" type="button">Colapsar todo</button>
+    </div>
+
+    <nav class="nav-crumbs" id="navCrumbs" aria-label="Ruta de navegación actual">
+      <span class="nav-label">Ruta:</span>
+      <span class="nav-empty">Ningún nodo seleccionado</span>
+    </nav>
+
+    <ul class="tree" id="tree" role="tree" aria-label="Jerarquía de tipos de eventos"></ul>
+  </main>
+
+  <aside class="side-panel">
+    <section class="panel-section selection">
+      <h2 class="panel-title">Selección actual</h2>
+      <div id="selectionArea" class="selection-empty">Seleccione un tipo de evento para ver su definición.</div>
+    </section>
+
+    <section class="panel-section recents">
+      <h2 class="panel-title">Recientes</h2>
+      <ul id="recentList" class="recent-list"></ul>
+    </section>
+  </aside>
 </div>
-<ul class='tree' id='tree'>
-    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Unidad activa</span>
-        <ul>
-            <li><span onclick='toggle(this)'><span class='icon'>▼</span>Indisponible</span>
-                <ul>
-                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Salida forzada no planificada</span>
-                        <ul>
-                            <li>
-                                <span><span class='icon'>✔</span>U1, Salida Forzada Inmediata (Forced Outage - Immediate)</span>
-                                <div class='definition'>Evento que requiere retirar la unidad del servicio de manera inmediata debido a una falla crítica, como un disparo de relés de protección o una situación que comprometa la seguridad operativa. Este tipo de evento ocurre sin previo aviso ni planificación. Incluye eventos automáticos, como disparos iniciados por el operador en respuesta a alarmas de la unidad. Cuando se selecciona este tipo de evento luego se debe seleccionar de modo excluyente alguno de los siguiente códigos de causa:<br>T1: Tripped/shutdown grid separation (automático).<br>T2: Tripped/shutdown grid separation (manual).<br>84: Unknown – Investigación en curso (debe ser actualizado cuando se determine la causa).</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>U2, Salida Forzada Retrasada (Forced Outage - Delayed)</span>
-                                <div class='definition'>Una salida de servicio que no requiere la retirada inmediata de una unidad en estado operativo, pero que debe ejecutarse dentro de las próximas 6 horas. Este tipo de salida solo puede ocurrir mientras la unidad está en servicio.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>U3, Salida Forzada Pospuesta (Forced Outage - Postponed)</span>
-                                <div class='definition'>Una salida de servicio que puede posponerse más allá de las 6 horas, pero que requiere que la unidad sea retirada del estado operativo antes de los 5 días corridos.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>MO, Salida por Mantenimiento (Maintenance Outage)</span>
-                                <div class='definition'>Una salida de servicio que puede posponerse más allá de los 5 días corridos, pero que requiere que el generador sea retirado del servicio o reducido en capacidad (derated) antes de la próxima salida planificada (PO). Este tipo de salida puede ocurrir en cualquier momento del año, tiene una fecha de inicio flexible, puede o no tener una duración predefinida y suele ser mucho más corta que una salida planificada. Si no puede ser postergado más allá de 5 días, el evento se clasifica como U3.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>SF, Falla de Arranque (Startup Failure)</span>
-                                <div class='definition'>Evento que ocurre cuando una unidad no puede sincronizarse con el sistema dentro del tiempo especificado después de un intento de arranque. Generalmente está relacionado con problemas técnicos en el proceso de encendido. Notas importantes: 1) Varios fallos consecutivos en un mismo período de arranque se contabilizan como una sola falla o evento. 2) Errores procedimentales que no requieren reparación no se cuentan como falla de arranque, deben clasificar como U1. 3) Si una unidad no ha tenido un arranque exitoso en los últimos 30 días, se recomienda realizar un "test start". Este arranque no se cuenta en los indicadores de desempeño. 4) Si una unidad logra arrancar pero experimenta una reducción de carga forzada inmediatamente después, se registra como D1 en lugar de SF.</div>
-                            </li>
-                        </ul>
-                    </li>
-                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Salida forzada planificada</span>
-                        <ul>
-                            <li>
-                                <span><span class='icon'>✔</span>PO, Mantenimiento Planificado (Planned Outage)</span>
-                                <div class='definition'>Una salida de servicio que se programa con mucha antelación, tiene una duración predefinida, suele extenderse durante varias semanas y ocurre solo una o dos veces al año. Los mantenimientos mayores o inspecciones de turbinas y calderas son ejemplos típicos de salidas planificadas por mantenimiento.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>PE, Extensión de mantenimiento Planificado (Planned Outage Extension)</span>
-                                <div class='definition'>Extensión de un evento tipo PO más allá de su fecha de finalización estimada. Se utiliza únicamente en casos donde el alcance original del trabajo requiere más tiempo para completarse.</div>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-            <li><span onclick='toggle(this)'><span class='icon'>▼</span>Disponible</span>
-                <ul>
-                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>En servicio con potencia reducida no planificada</span>
-                        <ul>
-                            <li>
-                                <span><span class='icon'>✔</span>D1, Reducción de Potencia Inmediata (Forced Derating - Immediate)</span>
-                                <div class='definition'>Reducción inmediata en la capacidad de generación de la unidad debido a problemas técnicos o fallas que afectan su operación.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>D2, Reducción de Potencia Retrasada (Forced Derating - Delayed)</span>
-                                <div class='definition'>Reducción de potencia que puede retrasarse temporalmente antes de su aplicación, mientras las condiciones de operación lo permitan.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>D3, Reducción de Potencia Pospuesta (Forced Derating - Postponed)</span>
-                                <div class='definition'>Reducción de potencia que se pospone hasta un momento operativo oportuno o cuando las condiciones lo permitan.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>D4, Reducción de Potencia por Mantenimiento (Maintenance Derating)</span>
-                                <div class='definition'>Reducción de potencia debido a tareas de mantenimiento preventivo o correctivo.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>DM, Extensión de Reducción de Potencia por Mantenimiento (Maintenance Derating Extension)</span>
-                                <div class='definition'>Extensión de una reducción de potencia por mantenimiento más allá del período inicialmente previsto debido a trabajos adicionales o retrasos.</div>
-                            </li>
-                        </ul>
-                    </li>
-                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>En servicio con potencia reducida planificada</span>
-                        <ul>
-                            <li>
-                                <span><span class='icon'>✔</span>PD, Reducción de Potencia Planificada (Planned Derating)</span>
-                                <div class='definition'>Reducción programada con antelación, generalmente para realizar ajustes operativos o cumplir con requisitos de pruebas específicas.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>DP, Extensión de Reducción de Potencia Planificada (Planned Derating Extension)</span>
-                                <div class='definition'>Extensión de una reducción de potencia planificada más allá de la duración originalmente estimada debido a nuevas condiciones o retrasos en la ejecución.</div>
-                            </li>
-                        </ul>
-                    </li>
-                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>En servicio sin limitaciones</span>
-                        <ul>
-                            <li>
-                                <span><span class='icon'>✔</span>NC, No Limitante (Non-Curtailing)</span>
-                                <div class='definition'>Evento que indica que la unidad opera sin restricciones técnicas o limitaciones operativas, es decir, a plena capacidad.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>PU, Modo Bombeo (Pumping Mode)</span>
-                                <div class='definition'>Indica que la unidad está en modo de bombeo, como parte de operaciones de almacenamiento de energía o regulación de la red eléctrica.</div>
-                            </li>
-                            <li>
-                                <span><span class='icon'>✔</span>CO, Condiciones de Sincronización (Synchronous Cond)</span>
-                                <div class='definition'>La unidad está conectada al sistema eléctrico y funcionando en sincronía con otras unidades del sistema, pero no necesariamente generando.</div>
-                            </li>
-                        </ul>
-                    </li>
-                    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Reserva sin limitaciones</span>
-                        <ul>
-                            <li>
-                                <span><span class='icon'>✔</span>RS, Parada en Reserva (Reserve Shutdown)</span>
-                                <div class='definition'>Estado en el que la unidad no está generando energía, pero está disponible y lista para entrar en servicio si se requiere. Generalmente ocurre por falta de demanda o decisiones operativas, sin restricciones técnicas.</div>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-    </li>
-    <li><span onclick='toggle(this)'><span class='icon'>▼</span>Unidad inactiva</span>
-        <ul>
-            <li><span onclick='toggle(this)'><span class='icon'>▼</span>Unidad inactiva</span>
-                <ul>
-                    <li>
-                        <span><span class='icon'>✔</span>IR, Reserva Inactiva (Inactive Reserve)</span>
-                        <div class='definition'>La unidad no está generando energía ni disponible para carga, pero permanece en reserva para ser reactivada si es necesario. Se diferencia de RS porque la unidad no puede ser activada inmediatamente; requiere intervención antes de entrar en servicio.</div>
-                    </li>
-                    <li>
-                        <span><span class='icon'>✔</span>RU, Retirada (Retired Unit)</span>
-                        <div class='definition'>La unidad ha sido retirada del servicio de manera permanente y no se planea que vuelva a operar.</div>
-                    </li>
-                    <li>
-                        <span><span class='icon'>✔</span>MB, Suspendida (Mothballed)</span>
-                        <div class='definition'>Unidad fuera de operación, pero no retirada permanentemente. Puede reactivarse en el futuro bajo condiciones específicas.</div>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-    </li>
-</ul>
+
 <script>
-    function toggle(element) {
-        const parent = element.parentElement;
-        parent.classList.toggle("active");
-        const icon = element.querySelector(".icon");
-        if (parent.classList.contains("active")) {
-            icon.textContent = "▲";
-        } else {
-            icon.textContent = "▼";
+const DATA = [
+  {
+    label: "Unidad activa",
+    children: [
+      {
+        label: "Indisponible",
+        children: [
+          {
+            label: "Salida forzada no planificada",
+            colorClass: "cat-red",
+            children: [
+              {
+                code: "U1",
+                desc: "Salida Forzada Inmediata",
+                en: "Forced Outage - Immediate",
+                definition: "Evento forzado no planificado que obliga a retirar inmediatamente la unidad generadora de servicio. Incluye tanto eventos automáticos, como disparos de relés de protección, como eventos manuales iniciados por el operador en respuesta a alarmas, condiciones anormales o riesgos para la integridad de la unidad. Al seleccionar este tipo de evento, deberá elegirse de manera excluyente uno de los siguientes códigos de causa::<br>T1, Desconexión de la red trip automático.<br>T2, Desconexión de la red trip manual.<br>84,  desconocido - investigación en curso (cambiar este código una vez se determine el modo de falla)."
+              },
+              {
+                code: "U2",
+                desc: "Salida Forzada Retrasada",
+                en: "Forced Outage - Delayed",
+                definition: "Una salida de servicio que no requiere la retirada inmediata de una unidad en estado operativo, pero que debe ejecutarse dentro de las próximas 6 horas. Este tipo de salida solo puede ocurrir mientras la unidad está en servicio."
+              },
+              {
+                code: "U3",
+                desc: "Salida Forzada Pospuesta",
+                en: "Forced Outage - Postponed",
+                definition: "Una salida de servicio que puede posponerse más allá de las 6 horas, pero que requiere que la unidad sea retirada del estado operativo antes de los 5 días corridos."
+              },
+              {
+                code: "MO",
+                desc: "Salida por Mantenimiento",
+                en: "Maintenance Outage",
+                definition: "Una salida de servicio que puede posponerse más allá de los 5 días corridos, pero que requiere que el generador sea retirado del servicio o reducido en capacidad (derated) antes de la próxima salida planificada (PO). Este tipo de salida puede ocurrir en cualquier momento del año, tiene una fecha de inicio flexible, puede o no tener una duración predefinida y suele ser mucho más corta que una salida planificada. Si no puede ser postergado más allá de 5 días, el evento se clasifica como U3."
+              },
+              {
+                code: "SF",
+                desc: "Falla de Arranque",
+                en: "Startup Failure",
+                definition: "Evento que ocurre cuando una unidad no puede sincronizarse con el sistema dentro del tiempo especificado después de un intento de arranque. Generalmente está relacionado con problemas técnicos en el proceso de encendido. Notas importantes: 1) Varios fallos consecutivos en un mismo período de arranque se contabilizan como una sola falla o evento. 2) Errores procedimentales que no requieren reparación no se cuentan como falla de arranque, deben clasificar como U1. 3) Si una unidad no ha tenido un arranque exitoso en los últimos 30 días, se recomienda realizar un test start. Este arranque no se cuenta en los indicadores de desempeño. 4) Si una unidad logra arrancar pero experimenta una reducción de carga forzada inmediatamente después, se registra como D1 en lugar de SF."
+              }
+            ]
+          },
+          {
+            label: "Salida forzada planificada",
+            children: [
+              {
+                code: "PO",
+                desc: "Mantenimiento Planificado",
+                en: "Planned Outage",
+                definition: "Una salida de servicio que se programa con mucha antelación, tiene una duración predefinida, suele extenderse durante varias semanas y ocurre solo una o dos veces al año. Los mantenimientos mayores o inspecciones de turbinas y calderas son ejemplos típicos de salidas planificadas por mantenimiento."
+              },
+              {
+                code: "PE",
+                desc: "Extensión de Mantenimiento Planificado",
+                en: "Planned Outage Extension",
+                definition: "Extensión de un evento tipo PO más allá de su fecha de finalización estimada. Se utiliza únicamente en casos donde el alcance original del trabajo requiere más tiempo para completarse."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        label: "Disponible",
+        children: [
+          {
+            label: "En servicio con potencia reducida no planificada",
+            colorClass: "cat-orange",
+            children: [
+              {
+                code: "D1",
+                desc: "Reducción de Potencia Inmediata",
+                en: "Forced Derating - Immediate",
+                definition: "Reducción inmediata en la capacidad de generación de la unidad debido a problemas técnicos o fallas que afectan su operación."
+              },
+              {
+                code: "D2",
+                desc: "Reducción de Potencia Retrasada",
+                en: "Forced Derating - Delayed",
+                definition: "Reducción de potencia que puede retrasarse temporalmente antes de su aplicación, mientras las condiciones de operación lo permitan."
+              },
+              {
+                code: "D3",
+                desc: "Reducción de Potencia Pospuesta",
+                en: "Forced Derating - Postponed",
+                definition: "Reducción de potencia que se pospone hasta un momento operativo oportuno o cuando las condiciones lo permitan."
+              },
+              {
+                code: "D4",
+                desc: "Reducción de Potencia por Mantenimiento",
+                en: "Maintenance Derating",
+                definition: "Reducción de potencia debido a tareas de mantenimiento preventivo o correctivo."
+              },
+              {
+                code: "DM",
+                desc: "Extensión de Reducción de Potencia por Mantenimiento",
+                en: "Maintenance Derating Extension",
+                definition: "Extensión de una reducción de potencia por mantenimiento más allá del período inicialmente previsto debido a trabajos adicionales o retrasos."
+              }
+            ]
+          },
+          {
+            label: "En servicio con potencia reducida planificada",
+            colorClass: "cat-violet",
+            children: [
+              {
+                code: "PD",
+                desc: "Reducción de Potencia Planificada",
+                en: "Planned Derating",
+                definition: "Reducción programada con antelación, generalmente para realizar ajustes operativos o cumplir con requisitos de pruebas específicas."
+              },
+              {
+                code: "DP",
+                desc: "Extensión de Reducción de Potencia Planificada",
+                en: "Planned Derating Extension",
+                definition: "Extensión de una reducción de potencia planificada más allá de la duración originalmente estimada debido a nuevas condiciones o retrasos en la ejecución."
+              }
+            ]
+          },
+          {
+            label: "En servicio sin limitaciones",
+            colorClass: "cat-green-dark",
+            children: [
+              {
+                code: "NC",
+                desc: "Servicio sin limitaciones",
+                en: "Non-Curtailing",
+                definition: "Evento en el que la unidad se encuentra en servicio sin restricciones técnicas ni limitaciones operativas que reduzcan su capacidad disponible. La unidad puede operar a plena capacidad cuando el despacho, la demanda o las condiciones del sistema lo requieran."
+              },
+              {
+                code: "CO",
+                desc: "Servicio de apoyo",
+                en: "Synchronous Cond",
+                definition: "Evento en el que la unidad permanece sincronizada al sistema eléctrico, pero opera en una condición cuyo objetivo principal no es generar energía activa. Se utiliza para brindar apoyo al sistema, por ejemplo estabilidad, compensación o servicios auxiliares, trabajando en condiciones que no necesariamente son las óptimas de funcionamiento para generación eléctrica."
+              }
+            ]
+          },
+          {
+            label: "Reserva sin limitaciones",
+            colorClass: "cat-green-light",
+            children: [
+              {
+                code: "RS",
+                desc: "Parada en Reserva",
+                en: "Reserve Shutdown",
+                definition: "Estado en el que la unidad no está generando energía, pero está disponible y lista para entrar en servicio si se requiere. Generalmente ocurre por falta de demanda o decisiones operativas, sin restricciones técnicas."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    label: "Unidad inactiva",
+    colorClass: "cat-gray",
+    children: [
+      {
+        label: "Unidad inactiva",
+        colorClass: "cat-gray",
+        children: [
+          {
+            code: "IR",
+            desc: "Reserva Inactiva",
+            en: "Inactive Reserve",
+            definition: "La unidad no está generando energía ni disponible para carga, pero permanece en reserva para ser reactivada si es necesario. Se diferencia de RS porque la unidad no puede ser activada inmediatamente; requiere intervención antes de entrar en servicio."
+          },
+          {
+            code: "RU",
+            desc: "Retirada",
+            en: "Retired Unit",
+            definition: "La unidad ha sido retirada del servicio de manera permanente y no se planea que vuelva a operar."
+          },
+          {
+            code: "MB",
+            desc: "Suspendida",
+            en: "Mothballed",
+            definition: "Unidad fuera de operación, pero no retirada permanentemente. Puede reactivarse en el futuro bajo condiciones específicas."
+          }
+        ]
+      }
+    ]
+  }
+];
+
+const tree = document.getElementById('tree');
+const searchInput = document.getElementById('search');
+const searchWrap = document.getElementById('searchWrap');
+const searchResults = document.getElementById('searchResults');
+const clearBtn = document.getElementById('clearBtn');
+const navCrumbs = document.getElementById('navCrumbs');
+const selectionArea = document.getElementById('selectionArea');
+const recentList = document.getElementById('recentList');
+const expandAllBtn = document.getElementById('expandAll');
+const collapseAllBtn = document.getElementById('collapseAll');
+
+const leafIndex = [];
+let selectedNode = null;
+let recents = [];
+
+function countLeaves(items) {
+  let count = 0;
+  items.forEach(item => {
+    if (item.code) count += 1;
+    if (item.children) count += countLeaves(item.children);
+  });
+  return count;
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function createIcon(symbolId) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttribute('href', symbolId);
+  svg.appendChild(use);
+  return svg;
+}
+
+function buildTree(items, parentUl, path = [], level = 1, inheritedColorClass = '') {
+  items.forEach(item => {
+    const li = document.createElement('li');
+    li.dataset.level = String(level);
+
+    const colorClass = item.colorClass || inheritedColorClass;
+    const node = document.createElement('div');
+    node.className = item.code ? `node leaf is-leaf${colorClass ? ' ' + colorClass : ''}` : `node is-folder lvl-${level}${item.colorClass ? ' ' + item.colorClass : ''}`;
+    node.tabIndex = 0;
+    node.setAttribute('role', 'treeitem');
+
+    const chevron = document.createElement('span');
+    chevron.className = 'chevron';
+
+    const icon = document.createElement('span');
+    icon.className = 'node-icon';
+
+    if (item.code) {
+      chevron.setAttribute('aria-hidden', 'true');
+      icon.appendChild(createIcon('#i-tag'));
+
+      const code = document.createElement('span');
+      code.className = 'code-chip';
+      code.textContent = item.code;
+
+      const desc = document.createElement('span');
+      desc.className = 'leaf-desc';
+      desc.textContent = item.desc;
+
+      const en = document.createElement('span');
+      en.className = 'leaf-en';
+      en.textContent = item.en ? `(${item.en})` : '';
+
+      node.dataset.code = item.code;
+      node.dataset.desc = item.desc;
+      node.dataset.en = item.en || '';
+      node.dataset.definition = item.definition || '';
+      node.dataset.path = JSON.stringify(path);
+
+      node.append(chevron, icon, code, desc, en);
+      node.addEventListener('click', () => selectLeaf(node));
+      node.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          selectLeaf(node);
         }
+      });
+
+      leafIndex.push({
+        node,
+        code: item.code,
+        desc: item.desc,
+        en: item.en || '',
+        definition: item.definition || '',
+        path,
+        searchText: normalizeText(`${item.code} ${item.desc} ${item.en || ''} ${(path || []).join(' ')} ${item.definition || ''}`)
+      });
+    } else {
+      node.setAttribute('aria-expanded', 'false');
+      chevron.appendChild(createIcon('#i-chevron'));
+      icon.appendChild(createIcon('#i-folder'));
+
+      const label = document.createElement('span');
+      label.className = 'node-label';
+      label.textContent = item.label;
+
+      const count = document.createElement('span');
+      count.className = 'node-count';
+      count.textContent = countLeaves(item.children || []);
+
+      node.append(chevron, icon, label, count);
+      node.addEventListener('click', () => toggleFolder(li));
+      node.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleFolder(li);
+        }
+      });
+
+      const ul = document.createElement('ul');
+      buildTree(item.children || [], ul, [...path, item.label], level + 1, colorClass);
+      li.append(node, ul);
+      parentUl.appendChild(li);
+      return;
     }
-    
-    const searchInput = document.getElementById('search');
-    const searchResults = document.getElementById('searchResults');
-    const treeItems = document.querySelectorAll('.tree li span');
 
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        searchResults.innerHTML = '';
+    li.appendChild(node);
+    parentUl.appendChild(li);
+  });
+}
 
-        if (searchTerm.length > 0) {
-            treeItems.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    const resultItem = document.createElement('div');
-                    resultItem.textContent = item.textContent;
-                    resultItem.addEventListener('click', () => {
-                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        item.parentElement.classList.add('active');
-                        item.parentElement.querySelectorAll('ul').forEach(ul => ul.style.display = 'block');
-                    });
-                    searchResults.appendChild(resultItem);
-                }
-            });
-        }
+function toggleFolder(li, force) {
+  const willOpen = typeof force === 'boolean' ? force : !li.classList.contains('open');
+  li.classList.toggle('open', willOpen);
+  const node = li.querySelector(':scope > .node');
+  if (node) node.setAttribute('aria-expanded', String(willOpen));
+  updateBreadcrumbFromOpenState();
+}
+
+function selectLeaf(node) {
+  if (selectedNode) selectedNode.classList.remove('selected');
+  selectedNode = node;
+  node.classList.add('selected');
+
+  openAncestors(node.closest('li'));
+  renderSelection(node);
+  renderBreadcrumb(JSON.parse(node.dataset.path || '[]'), node.dataset.code);
+  addRecent(node);
+  node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function renderSelection(node) {
+  const fullText = `${node.dataset.code}, ${node.dataset.desc}${node.dataset.en ? ` (${node.dataset.en})` : ''}`;
+  selectionArea.className = '';
+  selectionArea.innerHTML = `
+    <div class="selection-card">
+      <div class="sel-code">${escapeHtml(node.dataset.code)}</div>
+      <div class="sel-desc">${escapeHtml(node.dataset.desc)}</div>
+      ${node.dataset.en ? `<div class="sel-en">${escapeHtml(node.dataset.en)}</div>` : ''}
+      <div class="sel-definition">${node.dataset.definition}</div>
+      <div class="copy-actions">
+        <button class="btn btn-primary" type="button" data-copy="code">Copiar código</button>
+      </div>
+      <div class="copy-feedback" id="copyFeedback">Copiado</div>
+    </div>
+  `;
+
+  selectionArea.querySelector('[data-copy="code"]').addEventListener('click', () => copyText(node.dataset.code));
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const feedback = document.getElementById('copyFeedback');
+    if (!feedback) return;
+    feedback.classList.add('show');
+    setTimeout(() => feedback.classList.remove('show'), 1200);
+  });
+}
+
+function addRecent(node) {
+  const item = {
+    code: node.dataset.code,
+    desc: node.dataset.desc,
+    node
+  };
+  recents = recents.filter(x => x.code !== item.code);
+  recents.unshift(item);
+  recents = recents.slice(0, 6);
+  renderRecents();
+}
+
+function renderRecents() {
+  recentList.innerHTML = '';
+  if (!recents.length) {
+    const empty = document.createElement('div');
+    empty.className = 'recent-empty';
+    empty.textContent = 'Todavía no hay selecciones recientes.';
+    recentList.appendChild(empty);
+    return;
+  }
+
+  recents.forEach(item => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.innerHTML = `<span class="rc-code">${escapeHtml(item.code)}</span><span class="rc-desc">${escapeHtml(item.desc)}</span>`;
+    btn.addEventListener('click', () => selectLeaf(item.node));
+    li.appendChild(btn);
+    recentList.appendChild(li);
+  });
+}
+
+function openAncestors(li) {
+  let current = li;
+  while (current && current !== tree) {
+    if (current.tagName === 'LI') toggleFolder(current, true);
+    current = current.parentElement.closest('li');
+  }
+}
+
+function renderBreadcrumb(path, currentCode) {
+  navCrumbs.innerHTML = '<span class="nav-label">Ruta:</span>';
+  if (!path.length && !currentCode) {
+    navCrumbs.innerHTML += '<span class="nav-empty">Ningún nodo seleccionado</span>';
+    return;
+  }
+
+  path.forEach((part, index) => {
+    const button = document.createElement('button');
+    button.className = 'nav-crumb';
+    button.type = 'button';
+    button.textContent = part;
+    navCrumbs.appendChild(button);
+    navCrumbs.appendChild(createSep());
+  });
+
+  if (currentCode) {
+    const span = document.createElement('span');
+    span.className = 'nav-crumb current';
+    span.textContent = currentCode;
+    navCrumbs.appendChild(span);
+  }
+}
+
+function createSep() {
+  const sep = document.createElement('span');
+  sep.className = 'nav-sep';
+  sep.textContent = '›';
+  return sep;
+}
+
+function updateBreadcrumbFromOpenState() {
+  if (selectedNode) return;
+  const openFolders = Array.from(tree.querySelectorAll('li.open > .node.is-folder .node-label')).map(x => x.textContent);
+  renderBreadcrumb(openFolders.slice(-4), '');
+}
+
+function expandAll() {
+  tree.querySelectorAll('li').forEach(li => {
+    if (li.querySelector(':scope > ul')) toggleFolder(li, true);
+  });
+}
+
+function collapseAll() {
+  tree.querySelectorAll('li').forEach(li => toggleFolder(li, false));
+  renderBreadcrumb([], '');
+}
+
+function performSearch(term) {
+  const normalized = normalizeText(term);
+  searchResults.innerHTML = '';
+  tree.classList.toggle('searching', !!normalized);
+  searchWrap.classList.toggle('has-value', !!normalized);
+
+  tree.querySelectorAll('li').forEach(li => {
+    li.classList.remove('hidden', 'match-path');
+  });
+
+  if (!normalized) {
+    searchResults.classList.remove('open');
+    return;
+  }
+
+  const matches = leafIndex.filter(item => item.searchText.includes(normalized));
+
+  if (!matches.length) {
+    searchResults.innerHTML = '<div class="search-empty">Sin resultados</div>';
+    searchResults.classList.add('open');
+    tree.querySelectorAll('li').forEach(li => li.classList.add('hidden'));
+    return;
+  }
+
+  tree.querySelectorAll('li').forEach(li => li.classList.add('hidden'));
+
+  matches.forEach(item => {
+    const li = item.node.closest('li');
+    li.classList.remove('hidden');
+    li.classList.add('match-path');
+    openAncestors(li);
+
+    let ancestor = li.parentElement.closest('li');
+    while (ancestor) {
+      ancestor.classList.remove('hidden');
+      ancestor.classList.add('match-path');
+      ancestor = ancestor.parentElement.closest('li');
+    }
+
+    const result = document.createElement('div');
+    result.className = 'search-result';
+    result.innerHTML = `
+      <span class="sr-code">${highlight(item.code, term)}</span>
+      <span class="sr-text">${highlight(item.desc, term)}</span>
+      <span class="sr-path">${escapeHtml(item.path.join(' › '))}</span>
+    `;
+    result.addEventListener('click', () => {
+      selectLeaf(item.node);
+      searchResults.classList.remove('open');
     });
+    searchResults.appendChild(result);
+  });
+
+  searchResults.classList.add('open');
+}
+
+function highlight(text, term) {
+  const safe = escapeHtml(text || '');
+  const normalizedTerm = normalizeText(term);
+  if (!normalizedTerm) return safe;
+
+  const raw = String(text || '');
+  const lowerRaw = normalizeText(raw);
+  const idx = lowerRaw.indexOf(normalizedTerm);
+  if (idx === -1) return safe;
+
+  const before = escapeHtml(raw.slice(0, idx));
+  const match = escapeHtml(raw.slice(idx, idx + term.length));
+  const after = escapeHtml(raw.slice(idx + term.length));
+  return `${before}<mark>${match}</mark>${after}`;
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+buildTree(DATA, tree);
+renderRecents();
+
+const firstTop = tree.querySelector(':scope > li');
+if (firstTop) toggleFolder(firstTop, true);
+
+searchInput.addEventListener('input', event => performSearch(event.target.value));
+clearBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  performSearch('');
+  searchInput.focus();
+});
+
+expandAllBtn.addEventListener('click', expandAll);
+collapseAllBtn.addEventListener('click', collapseAll);
+
+document.addEventListener('click', event => {
+  if (!searchWrap.contains(event.target)) searchResults.classList.remove('open');
+});
 </script>
 </body>
 </html>

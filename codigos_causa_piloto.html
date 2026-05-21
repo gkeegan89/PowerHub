@@ -54,11 +54,6 @@
 
   /* ---------- Header ---------- */
   .app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 8px;
     margin-bottom: 14px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border);
@@ -69,33 +64,84 @@
     margin: 0;
     color: var(--fg);
   }
-  .app-header .meta {
-    font-size: 12px;
-    color: var(--fg-muted);
-  }
-  .pilot-badge {
-    display: inline-block;
-    background: #fff4e0;
-    color: #8a5a00;
-    border: 1px solid #f3d89a;
-    border-radius: 999px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 600;
-    margin-left: 8px;
-    vertical-align: middle;
-  }
 
-  /* ---------- Layout 2 columnas ---------- */
+  /* ---------- Layout 2 columnas con altura fija ---------- */
   .layout {
     display: grid;
     grid-template-columns: 1fr 320px;
     gap: 16px;
-    align-items: start;
+    align-items: stretch;
+    /* Altura fija: aprovecha el viewport del iframe pero con piso para que no se aplaste */
+    height: calc(100vh - 80px);
+    min-height: 420px;
+  }
+  .layout > main,
+  .layout > .side-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* clave para que el flex permita shrink y aparezca scroll en hijos */
   }
   @media (max-width: 820px) {
-    .layout { grid-template-columns: 1fr; }
+    .layout {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
     .side-panel { order: -1; }
+  }
+
+  /* ---------- Breadcrumb de navegación (arriba del árbol) ---------- */
+  .nav-crumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+    min-height: 32px;
+  }
+  .nav-crumbs .nav-label {
+    color: var(--fg-faint);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-size: 10px;
+    margin-right: 4px;
+  }
+  .nav-crumbs .nav-crumb {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: background .1s;
+  }
+  .nav-crumbs .nav-crumb:hover {
+    background: var(--accent-soft);
+    text-decoration: underline;
+  }
+  .nav-crumbs .nav-crumb:last-of-type {
+    color: var(--fg);
+    font-weight: 600;
+    cursor: default;
+  }
+  .nav-crumbs .nav-crumb:last-of-type:hover {
+    background: none;
+    text-decoration: none;
+  }
+  .nav-crumbs .nav-sep {
+    color: var(--fg-faint);
+    font-size: 11px;
+  }
+  .nav-crumbs .nav-empty {
+    color: var(--fg-faint);
+    font-style: italic;
   }
 
   /* ---------- Toolbar ---------- */
@@ -268,7 +314,10 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 6px;
-    min-height: 200px;
+    /* Llena el espacio disponible en el flex container, scroll interno si excede */
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
   }
   .tree ul {
     /* Línea-guía sutil de jerarquía */
@@ -389,8 +438,9 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 14px;
-    position: sticky;
-    top: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   .panel-title {
     font-size: 11px;
@@ -400,7 +450,34 @@
     color: var(--fg-muted);
     margin: 0 0 8px;
   }
-  .panel-section + .panel-section { margin-top: 18px; }
+  /* Selección Actual: altura fija, no crece ni se achica */
+  .panel-section.selection {
+    flex: 0 0 auto;
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-section.selection #selectionArea {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  /* Recientes: ocupa el resto */
+  .panel-section.recents {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .panel-section.recents .recent-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+  }
 
   .selection-empty {
     color: var(--fg-faint);
@@ -503,29 +580,12 @@
     font-size: 12px;
     font-style: italic;
   }
-
-  /* Footer del piloto */
-  .pilot-note {
-    margin-top: 14px;
-    font-size: 11px;
-    color: var(--fg-faint);
-    padding: 8px 10px;
-    background: var(--bg-subtle);
-    border-left: 3px solid var(--border-strong);
-    border-radius: 0 4px 4px 0;
-  }
 </style>
 </head>
 <body>
 
 <header class="app-header">
-  <div>
-    <h1>
-      Códigos de Causa GADS NERC
-      <span class="pilot-badge">PILOTO · 26 códigos</span>
-    </h1>
-    <div class="meta">Heavy Duty › Turbina de gas › Sistema de aire de entrada y compresores</div>
-  </div>
+  <h1>Códigos de Causa GADS NERC</h1>
 </header>
 
 <div class="layout">
@@ -546,8 +606,8 @@
         <div class="search-results" id="searchResults" role="listbox"></div>
       </div>
 
-      <div class="unit-filter" title="En el piloto solo hay 1 unidad disponible. El selector queda como muestra de UX para el rollout completo.">
-        Unidad:
+      <div class="unit-filter" title="En el piloto solo hay 1 configuración disponible. El selector queda como muestra de UX para el rollout completo.">
+        Configuración de la unidad de generación:
         <select id="unitFilter" disabled>
           <option>Heavy Duty (piloto)</option>
         </select>
@@ -556,6 +616,11 @@
       <button class="btn" id="expandAll" type="button">Expandir todo</button>
       <button class="btn" id="collapseAll" type="button">Colapsar todo</button>
     </div>
+
+    <nav class="nav-crumbs" id="navCrumbs" aria-label="Ruta de navegación actual">
+      <span class="nav-label">Ruta:</span>
+      <span class="nav-empty">Ningún nodo expandido</span>
+    </nav>
 
     <ul class="tree" id="tree" role="tree" aria-label="Jerarquía de códigos de causa">
       <!-- ÁRBOL: nivel 1 expandido por defecto. Toda la cadena hasta los 27 códigos. -->
@@ -642,27 +707,19 @@
       </li>
     </ul>
 
-    <div class="pilot-note">
-      <strong>Nota piloto.</strong> 26 códigos de 2 bloques representativos del subárbol
-      <em>Sistema de aire de entrada y compresores</em>. Una vez validada la UX, se replica al resto
-      de la jerarquía conservando la misma plantilla por hoja. <strong>Fuera de alcance del piloto:</strong>
-      integración con estados IEEE 762, deduplicación cross-unidad (requiere el árbol completo) y
-      tooltips de criterios de clasificación NERC (FO vs MO, etc.) que necesitan curaduría caso por caso.
-    </div>
-
   </main>
 
   <!-- ============ COLUMNA LATERAL: selección + recientes ============ -->
   <aside class="side-panel">
 
-    <div class="panel-section">
+    <div class="panel-section selection">
       <h2 class="panel-title">Selección actual</h2>
       <div id="selectionArea">
         <div class="selection-empty">Hacé clic en un código para seleccionarlo.</div>
       </div>
     </div>
 
-    <div class="panel-section">
+    <div class="panel-section recents">
       <h2 class="panel-title">Recientes (esta sesión)</h2>
       <ul class="recent-list" id="recentList">
         <li class="recent-empty">Aún no hay códigos consultados.</li>
@@ -689,6 +746,10 @@
   const collapseAllBtn = document.getElementById('collapseAll');
   const selectionArea = document.getElementById('selectionArea');
   const recentList = document.getElementById('recentList');
+  const navCrumbs = document.getElementById('navCrumbs');
+
+  // Último folder expandido por click (referencia para el breadcrumb de navegación)
+  let lastExpandedFolder = null;
 
   // Recientes en memoria (no localStorage — iframes SharePoint a veces lo bloquean)
   const recents = [];
@@ -745,6 +806,61 @@
   }
 
   // ============================================================
+  // BREADCRUMB DE NAVEGACIÓN (arriba del árbol)
+  // Refleja el último folder expandido por click. Si ese folder
+  // se cerró o ya no está abierto, retrocede al ancestro abierto
+  // más profundo. Si no hay nada abierto, muestra estado vacío.
+  // ============================================================
+  function updateNavCrumbs() {
+    // Si el último folder expandido sigue abierto, lo usamos.
+    // Si no, buscamos el folder abierto más profundo del árbol.
+    let target = null;
+    if (lastExpandedFolder && lastExpandedFolder.classList.contains('open') && tree.contains(lastExpandedFolder)) {
+      target = lastExpandedFolder;
+    } else {
+      // Fallback: el folder abierto más profundo
+      const openFolders = tree.querySelectorAll('li.open');
+      let maxDepth = -1;
+      openFolders.forEach(li => {
+        const depth = parseInt(li.dataset.level || '0', 10);
+        if (depth > maxDepth) {
+          maxDepth = depth;
+          target = li;
+        }
+      });
+    }
+
+    if (!target) {
+      navCrumbs.innerHTML = '<span class="nav-label">Ruta:</span><span class="nav-empty">Ningún nodo expandido</span>';
+      return;
+    }
+
+    // Armar el path desde la raíz hasta el target (incluido)
+    const path = [];
+    let cur = target;
+    while (cur && cur !== tree) {
+      const label = cur.querySelector(':scope > .node > .node-label');
+      if (label) path.unshift({ el: cur, text: label.textContent.trim() });
+      cur = cur.parentElement.closest('li');
+    }
+
+    const html = ['<span class="nav-label">Ruta:</span>'];
+    path.forEach((p, i) => {
+      if (i > 0) html.push('<span class="nav-sep">›</span>');
+      html.push(`<button class="nav-crumb" type="button" data-crumb-idx="${i}">${escapeHtml(p.text)}</button>`);
+    });
+    navCrumbs.innerHTML = html.join('');
+
+    // Click en un segmento del breadcrumb: scroll al nodo
+    navCrumbs.querySelectorAll('.nav-crumb').forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        const node = path[i].el.querySelector(':scope > .node');
+        if (node) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+  }
+
+  // ============================================================
   // ÁRBOL: toggle, expandir/colapsar
   // ============================================================
   tree.addEventListener('click', function (e) {
@@ -754,7 +870,11 @@
 
     if (node.classList.contains('is-folder')) {
       li.classList.toggle('open');
-      node.setAttribute('aria-expanded', li.classList.contains('open') ? 'true' : 'false');
+      const isOpen = li.classList.contains('open');
+      node.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      // Si lo acabamos de abrir, queda como referencia del breadcrumb
+      if (isOpen) lastExpandedFolder = li;
+      updateNavCrumbs();
     } else if (node.classList.contains('is-leaf')) {
       selectLeaf(node);
     }
@@ -777,6 +897,10 @@
         if (n) n.setAttribute('aria-expanded', 'true');
       }
     });
+    // Tras expandir todo, no hay un "último click" claro: reseteamos
+    // para que updateNavCrumbs use el fallback (folder más profundo)
+    lastExpandedFolder = null;
+    updateNavCrumbs();
   });
 
   collapseAllBtn.addEventListener('click', () => {
@@ -787,6 +911,8 @@
         if (n) n.setAttribute('aria-expanded', 'false');
       }
     });
+    lastExpandedFolder = null;
+    updateNavCrumbs();
   });
 
   // ============================================================
@@ -818,7 +944,6 @@
         <div class="sel-en">${escapeHtml(sel.en)}</div>
         <div class="copy-actions">
           <button class="btn btn-primary" data-copy="code">Copiar código</button>
-          <button class="btn" data-copy="full">Copiar código + descripción</button>
         </div>
         <div class="copy-feedback" id="copyFeedback">Copiado ✓</div>
       </div>
@@ -826,9 +951,7 @@
 
     selectionArea.querySelectorAll('[data-copy]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const what = btn.dataset.copy;
-        const text = what === 'code' ? sel.code : `${sel.code} — ${sel.desc}`;
-        copyToClipboard(text);
+        copyToClipboard(sel.code);
       });
     });
   }
@@ -979,12 +1102,17 @@
   function revealAndSelect(leafEl) {
     // Expandir todos los ancestros
     let cur = leafEl.closest('li').parentElement.closest('li');
+    let deepestFolder = null;
     while (cur) {
       cur.classList.add('open');
       const n = cur.querySelector(':scope > .node');
       if (n) n.setAttribute('aria-expanded', 'true');
+      if (!deepestFolder) deepestFolder = cur; // primero en la iteración = el más profundo (la hoja se cuelga de él)
       cur = cur.parentElement.closest('li');
     }
+    if (deepestFolder) lastExpandedFolder = deepestFolder;
+    updateNavCrumbs();
+
     selectLeaf(leafEl);
     leafEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     // Cerrar dropdown
@@ -1045,6 +1173,13 @@
       results[activeResultIdx].scrollIntoView({ block: 'nearest' });
     }
   }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  // Al arrancar, los 3 niveles raíz están abiertos en el HTML.
+  // Mostramos el breadcrumb reflejando esa profundidad inicial.
+  updateNavCrumbs();
 
 })();
 </script>

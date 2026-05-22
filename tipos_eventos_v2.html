@@ -571,31 +571,31 @@ const DATA = [
                 code: "U1",
                 desc: "Salida Forzada Inmediata",
                 en: "Forced Outage - Immediate",
-                definition: "Evento que requiere retirar la unidad del servicio de manera inmediata debido a una falla crítica, como un disparo de relés de protección o una situación que comprometa la seguridad operativa. Este tipo de evento ocurre sin previo aviso ni planificación. Incluye eventos automáticos, como disparos iniciados por el operador en respuesta a alarmas de la unidad. Cuando se selecciona este tipo de evento luego se debe seleccionar de modo excluyente alguno de los siguientes códigos de causa:<br>T1: Tripped/shutdown grid separation (automático).<br>T2: Tripped/shutdown grid separation (manual).<br>84: Unknown – Investigación en curso (debe ser actualizado cuando se determine la causa)."
+                definition: "Evento no planificado que obliga a retirar inmediatamente la unidad generadora del servicio. Incluye tanto los disparos automáticos por protecciones, como las paradas manuales iniciadas por el operador en respuesta a alarmas o condiciones anómalas que no admiten espera. Puede originarse por fallas dentro o fuera de la gestión de la planta.<br><br>Si existe una falla en la unidad pero la misma puede continuar en servicio por algunas horas antes de ser retirada, corresponde U2; si admite varios días, corresponde U3. Si la falla aparece cuando la unidad se encuentra detenida (fuera de servicio), corresponde MO.<br><br>Para el tipo de evento U1, obligatoriamente se debe elegir alguno de los siguientes modos de falla:<br><br>• T1 – Disparo automático por separación de la red.<br>• T2 – Disparo manual por separación de la red.<br>• 84 – Causa desconocida / investigación en curso (debe actualizarse al determinarse la causa raíz)."
               },
               {
                 code: "U2",
                 desc: "Salida Forzada Retrasada",
                 en: "Forced Outage - Delayed",
-                definition: "Una salida de servicio que no requiere la retirada inmediata de una unidad en estado operativo, pero que debe ejecutarse dentro de las próximas 6 horas. Este tipo de salida solo puede ocurrir mientras la unidad está en servicio."
+                definition: "Evento no planificado que no exige el retiro inmediato de la unidad generadora del servicio, pero que requiere su salida dentro de un plazo máximo de 6 horas posteriores a la detección de la condición anómala. Se utiliza cuando se detecta una anomalía que permite continuar generando temporalmente bajo vigilancia, pero cuyo diagnóstico, evolución o severidad obliga a detener la unidad en el corto plazo.<br><br>La unidad debe encontrarse en servicio al momento de identificarse la falla. Puede originarse por fallas dentro o fuera de la gestión de la planta. Para U2, se considera como fecha y hora de inicio el momento en que la unidad efectivamente salió de servicio."
               },
               {
                 code: "U3",
                 desc: "Salida Forzada Pospuesta",
                 en: "Forced Outage - Postponed",
-                definition: "Una salida de servicio que puede posponerse más allá de las 6 horas, pero que requiere que la unidad sea retirada del estado operativo antes de los 5 días corridos."
+                definition: "Evento no planificado que no requiere el retiro inmediato de la unidad generadora del servicio y cuya salida puede diferirse más allá de las 6 horas, pero debe ejecutarse antes de los 5 días corridos contados desde la detección de la condición anómala. Se utiliza cuando la falla o desviación detectada permite continuar operando bajo seguimiento durante varios días, pero no puede esperar hasta una ventana de mantenimiento programada.<br><br>La unidad debe encontrarse en servicio al momento de identificarse la falla. Puede originarse por fallas dentro o fuera de la gestión de la planta, típicamente en unidades con operación en base. Para U3, se considera como fecha y hora de inicio el momento en que la unidad efectivamente salió de servicio."
               },
               {
                 code: "MO",
-                desc: "Salida por Mantenimiento",
+                desc: "Salida por Mantenimiento no planificado",
                 en: "Maintenance Outage",
-                definition: "Una salida de servicio que puede posponerse más allá de los 5 días corridos, pero que requiere que el generador sea retirado del servicio o reducido en capacidad (derated) antes de la próxima salida planificada (PO). Este tipo de salida puede ocurrir en cualquier momento del año, tiene una fecha de inicio flexible, puede o no tener una duración predefinida y suele ser mucho más corta que una salida planificada. Si no puede ser postergado más allá de 5 días, el evento se clasifica como U3."
+                definition: "Salida de servicio para ejecutar un mantenimiento que no fue planificado con anticipación. Son eventos que pueden diferirse más allá de los 5 días corridos, pero que deben ejecutarse antes de la próxima salida planificada (PO) o MAPRO coordinado con CAMMESA. A diferencia de la salida planificada (PO), posee fecha de inicio flexible, puede o no tener duración predefinida, suele ser sustancialmente más corta y puede ocurrir en cualquier momento del año. Habitualmente se utiliza para trabajos de mantenimiento correctivos (declarado o no declarados a CAMMESA) o mantenimientos de oportunidad.<br><br>La unidad debe encontrarse detenida o en reserva como estado operativo previo al inicio del evento."
               },
               {
                 code: "SF",
                 desc: "Falla de Arranque",
-                en: "Startup Failure",
-                definition: "Evento que ocurre cuando una unidad no puede sincronizarse con el sistema dentro del tiempo especificado después de un intento de arranque. Generalmente está relacionado con problemas técnicos en el proceso de encendido. Notas importantes: 1) Varios fallos consecutivos en un mismo período de arranque se contabilizan como una sola falla o evento. 2) Errores procedimentales que no requieren reparación no se cuentan como falla de arranque, deben clasificar como U1. 3) Si una unidad no ha tenido un arranque exitoso en los últimos 30 días, se recomienda realizar un test start. Este arranque no se cuenta en los indicadores de desempeño. 4) Si una unidad logra arrancar pero experimenta una reducción de carga forzada inmediatamente después, se registra como D1 en lugar de SF."
+                en: "Start Failure",
+                definition: "Evento que ocurre cuando una unidad no puede sincronizarse con el sistema dentro del tiempo especificado después de un intento de arranque. Generalmente está relacionado con problemas técnicos en el proceso de encendido o arranque de la unidad.<br><br>Notas importantes:<br>- Varios fallos consecutivos dentro de un mismo período de arranque se contabilizan como un solo evento tipo &quot;&quot;Falla aranque (SF)&quot;&quot;.<br>- Errores procedimentales u operativos que no requieren reparación no se consideran falla de arranque y deben clasificarse como U1.<br>- Si una unidad no ha tenido un arranque exitoso en los últimos 30 días, se recomienda realizar un “test start”. Dicho arranque no se contabiliza dentro de los indicadores de desempeño operativo.<br>- Si la unidad logra sincronizarse pero experimenta una reducción de carga forzada inmediatamente posterior al arranque, el evento debe clasificarse como D1.&quot;"
               }
             ]
           },
@@ -606,7 +606,7 @@ const DATA = [
                 code: "PO",
                 desc: "Mantenimiento Planificado",
                 en: "Planned Outage",
-                definition: "Una salida de servicio que se programa con mucha antelación, tiene una duración predefinida, suele extenderse durante varias semanas y ocurre solo una o dos veces al año. Los mantenimientos mayores o inspecciones de turbinas y calderas son ejemplos típicos de salidas planificadas por mantenimiento."
+                definition: "Salida de servicio programada con anticipación, con fecha de inicio fija y duración predefinida dentro del plan de mantenimiento anual o plurianual. Habitualmente corresponde a intervenciones de gran alcance y de varias semanas de duración, coordinadas previamente con CAMMESA mediante MAPRO. Generalmente ocurre una o dos veces al año."
               },
               {
                 code: "PE",
@@ -629,31 +629,31 @@ const DATA = [
                 code: "D1",
                 desc: "Reducción de Potencia Inmediata",
                 en: "Forced Derating - Immediate",
-                definition: "Reducción inmediata en la capacidad de generación de la unidad debido a problemas técnicos o fallas que afectan su operación."
+                definition: "Reducción inmediata y no planificada en la capacidad de generación de la unidad, ocasionada por problemas técnicos o fallas que afectan su operación y que no admiten demora. La unidad permanece sincronizada al sistema, pero no puede sostener su potencia disponible normal. Puede originarse por fallas dentro o fuera de la gestión de la planta."
               },
               {
                 code: "D2",
                 desc: "Reducción de Potencia Retrasada",
                 en: "Forced Derating - Delayed",
-                definition: "Reducción de potencia que puede retrasarse temporalmente antes de su aplicación, mientras las condiciones de operación lo permitan."
+                definition: "Reducción de potencia no planificada que no requiere aplicación inmediata, pero que debe ejecutarse dentro de las 6 horas posteriores a la detección de la condición anómala, mientras las condiciones de operación permitan continuar generando temporalmente bajo vigilancia. La unidad permanece sincronizada al sistema y puede originarse por fallas dentro o fuera de la gestión de la planta."
               },
               {
                 code: "D3",
                 desc: "Reducción de Potencia Pospuesta",
                 en: "Forced Derating - Postponed",
-                definition: "Reducción de potencia que se pospone hasta un momento operativo oportuno o cuando las condiciones lo permitan."
+                definition: "Reducción de potencia no planificada que puede postergarse hasta un momento operativamente oportuno, por ejemplo una baja de demanda, un cambio de turno o una ventana de despacho favorable, sin un plazo apremiante para su aplicación. La unidad permanece sincronizada y en servicio durante la condición.<br><br>Puede originarse por fallas o desvíos dentro o fuera de la gestión de la planta que afectan la capacidad de generación, pero que permiten continuar operando bajo seguimiento hasta ejecutar la reducción de carga."
               },
               {
                 code: "D4",
                 desc: "Reducción de Potencia por Mantenimiento",
                 en: "Maintenance Derating",
-                definition: "Reducción de potencia debido a tareas de mantenimiento preventivo o correctivo."
+                definition: "Reducción de potencia no planificada asociada a tareas de mantenimiento preventivo o correctivo que se ejecutan con la unidad en servicio a capacidad reducida. La unidad continúa disponible y generando, pero a una potencia menor a la habilitada para permitir la intervención.<br><br>Se utiliza cuando un trabajo de mantenimiento puede realizarse sin retirar la unidad de servicio, aplicando un derating temporal de carga. Habitualmente aplica a intervenciones sobre equipos redundantes o auxiliares."
               },
               {
                 code: "DM",
                 desc: "Extensión de Reducción de Potencia por Mantenimiento",
                 en: "Maintenance Derating Extension",
-                definition: "Extensión de una reducción de potencia por mantenimiento más allá del período inicialmente previsto debido a trabajos adicionales o retrasos."
+                definition: "Extensión de una &quot; Reducción de Potencia por Mantenimiento (D4)&quot; más allá de la duración originalmente prevista."
               }
             ]
           },
@@ -665,13 +665,13 @@ const DATA = [
                 code: "PD",
                 desc: "Reducción de Potencia Planificada",
                 en: "Planned Derating",
-                definition: "Reducción programada con antelación, generalmente para realizar ajustes operativos o cumplir con requisitos de pruebas específicas."
+                definition: "Reducción de potencia programada con anticipación, con fecha de inicio y duración predefinidas, generalmente incluida dentro del plan de mantenimiento, operación o ensayos de la unidad. La unidad permanece sincronizada y generando, pero con una capacidad menor a la habilitada durante el período planificado.<br><br>Habitualmente se utiliza para ajustes operativos planificados, pruebas regulatorias, ensayos de performance, mantenimientos menores con la unidad en servicio o intervenciones coordinadas previamente con CAMMESA."
               },
               {
                 code: "DP",
                 desc: "Extensión de Reducción de Potencia Planificada",
                 en: "Planned Derating Extension",
-                definition: "Extensión de una reducción de potencia planificada más allá de la duración originalmente estimada debido a nuevas condiciones o retrasos en la ejecución."
+                definition: "Extensión de una &quot;&quot;reducción de potencia planificada (PD)&quot; más allá de la duración originalmente prevista, manteniendo el mismo alcance de trabajo o condición operativa originalmente planificada. La unidad permanece sincronizada y generando con capacidad reducida durante la extensión del evento.<br><br>Si durante el PD aparece una nueva falla, condición o trabajo no contemplado dentro del alcance original, debe abrirse un nuevo evento independiente del tipo que corresponda.&quot;"
               }
             ]
           },
@@ -683,13 +683,13 @@ const DATA = [
                 code: "NC",
                 desc: "Servicio sin limitaciones",
                 en: "Non-Curtailing",
-                definition: "Evento en el que la unidad se encuentra en servicio sin restricciones técnicas ni limitaciones operativas que reduzcan su capacidad disponible. La unidad puede operar a plena capacidad cuando el despacho, la demanda o las condiciones del sistema lo requieran."
+                definition: "Estado operativo en el cual la unidad se encuentra en servicio, generando energía sin restricciones técnicas ni limitaciones operativas.<br><br>Se utiliza como estado de referencia cuando no existe ningún evento limitante activo."
               },
               {
                 code: "CO",
                 desc: "Servicio de apoyo",
                 en: "Synchronous Cond",
-                definition: "Evento en el que la unidad permanece sincronizada al sistema eléctrico, pero opera en una condición cuyo objetivo principal no es generar energía activa. Se utiliza para brindar apoyo al sistema, por ejemplo estabilidad, compensación o servicios auxiliares, trabajando en condiciones que no necesariamente son las óptimas de funcionamiento para generación eléctrica."
+                definition: "Estado operativo en el que la unidad permanece sincronizada al sistema eléctrico, pero opera en una condición cuyo objetivo principal no es la generación de energía. Se utiliza para brindar apoyo al sistema eléctrico, por ejemplo para estabilidad de tensión, regulación de frecuencia o compensación de potencia reactiva, entre otros, trabajando en condiciones que no necesariamente son las óptimas para generación eléctrica.<br><br>Ejemplo, cuando CAMMESA solicita operar en mínimo técnico."
               }
             ]
           },
@@ -701,7 +701,7 @@ const DATA = [
                 code: "RS",
                 desc: "Parada en Reserva",
                 en: "Reserve Shutdown",
-                definition: "Estado en el que la unidad no está generando energía, pero está disponible y lista para entrar en servicio si se requiere. Generalmente ocurre por falta de demanda o decisiones operativas, sin restricciones técnicas."
+                definition: "Estado operativo en el que la unidad no se encuentra generando energía, pero permanece disponible y en condiciones de entrar en servicio cuando sea requerida. Generalmente ocurre por falta de demanda, despacho insuficiente o decisiones operativas, sin existir restricciones técnicas que impidan su arranque o generación."
               }
             ]
           }
@@ -718,27 +718,29 @@ const DATA = [
         colorClass: "cat-gray",
         children: [
           {
-            label: "Unidad inactiva",
+            label: "Estados inactivos",
             colorClass: "cat-gray",
             children: [
+                            {
+                code: "MB",
+                desc: "Suspendida",
+                en: "Mothballed",
+                definition: "Estado operativo en el que la unidad se encuentra fuera de servicio de manera temporal, preservada y sin generación, pero con expectativa razonable de retorno a operación en el corto o mediano plazo. La unidad puede reactivarse bajo determinadas condiciones técnicas, económicas o de demanda, requiriendo tareas limitadas de acondicionamiento antes de volver al servicio."
+              },
+              
               {
                 code: "IR",
                 desc: "Reserva Inactiva",
                 en: "Inactive Reserve",
-                definition: "La unidad no está generando energía ni disponible para carga, pero permanece en reserva para ser reactivada si es necesario. Se diferencia de RS porque la unidad no puede ser activada inmediatamente; requiere intervención antes de entrar en servicio."
+                definition: "Estado operativo en el que la unidad no se encuentra generando ni disponible para tomar carga, pero permanece en reserva para una eventual reactivación futura. A diferencia de MB, la unidad requiere trabajos significativos de acondicionamiento, inspección, reparación o pruebas antes de poder volver al servicio, por lo que no se espera un retorno operativo en el corto plazo."
               },
               {
                 code: "RU",
                 desc: "Retirada",
                 en: "Retired Unit",
-                definition: "La unidad ha sido retirada del servicio de manera permanente y no se planea que vuelva a operar."
-              },
-              {
-                code: "MB",
-                desc: "Suspendida",
-                en: "Mothballed",
-                definition: "Unidad fuera de operación, pero no retirada permanentemente. Puede reactivarse en el futuro bajo condiciones específicas."
+                definition: "Estado operativo en el que la unidad ha sido retirada del servicio de manera permanente y no se prevé su retorno a operación. La unidad deja de formar parte de la capacidad disponible de generación de la planta o del sistema eléctrico y su reactivación no es considerada técnica ni económicamente viable."
               }
+
             ]
           }
         ]

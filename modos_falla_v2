@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modos de falla GADS NERC — clasificación</title>
+<style>
+  /* =========================================================
+     PILOTO — 27 códigos (Sistema de aire de entrada y compresores)
+     Rediseño UI sobre la opinión del agente Claude (Chrome).
+     Drop-in para iframe SharePoint PowerHub. Sin dependencias.
+     ========================================================= */
+
+  :root {
+    --bg:            #ffffff;
+    --bg-subtle:     #f6f8fb;
+    --bg-hover:      #eef2f8;
+    --border:        #dde3eb;
+    --border-strong: #c4cdda;
+    --fg:            #1a1d21;
+    --fg-muted:      #5b6470;
+    --fg-faint:      #8a93a0;
+    --accent:        #1f5fa8;
+    --accent-soft:   #e8f0fb;
+    --accent-strong: #134a8a;
+    --code-bg:       #eef2f7;
+    --code-fg:       #134a8a;
+    --shadow-sm:     0 1px 2px rgba(20, 30, 50, 0.06);
+    --shadow-md:     0 4px 12px rgba(20, 30, 50, 0.08);
+    --radius:        6px;
+    --mono:          ui-monospace, "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
+    --sans:          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Tinte sutil por nivel — refuerza jerarquía sin saturar */
+    --tint-1: #f5f8fc;
+    --tint-2: #f9fbfd;
+    --tint-3: #fcfdfe;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body { padding: 16px; }
+
+  /* ---------- Header ---------- */
+  .app-header {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .app-header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--fg);
+  }
+
+  /* ---------- Layout 2 columnas con altura fija ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    align-items: stretch;
+    /* Altura fija: aprovecha el viewport del iframe pero con piso para que no se aplaste */
+    height: calc(100vh - 80px);
+    min-height: 420px;
+  }
+  .layout > main,
+  .layout > .side-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* clave para que el flex permita shrink y aparezca scroll en hijos */
+  }
+  @media (max-width: 820px) {
+    .layout {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+    .side-panel { order: -1; }
+  }
+
+  /* ---------- Breadcrumb de navegación (arriba del árbol) ---------- */
+  .nav-crumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+    min-height: 32px;
+  }
+  .nav-crumbs .nav-label {
+    color: var(--fg-faint);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-size: 10px;
+    margin-right: 4px;
+  }
+  .nav-crumbs .nav-crumb {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: background .1s;
+  }
+  .nav-crumbs .nav-crumb:hover {
+    background: var(--accent-soft);
+    text-decoration: underline;
+  }
+  .nav-crumbs .nav-crumb:last-of-type {
+    color: var(--fg);
+    font-weight: 600;
+    cursor: default;
+  }
+  .nav-crumbs .nav-crumb:last-of-type:hover {
+    background: none;
+    text-decoration: none;
+  }
+  .nav-crumbs .nav-sep {
+    color: var(--fg-faint);
+    font-size: 11px;
+  }
+  .nav-crumbs .nav-empty {
+    color: var(--fg-faint);
+    font-style: italic;
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 8px 32px 8px 32px;
+    font-size: 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--bg);
+    font-family: inherit;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .search-wrap input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .search-wrap .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--fg-faint);
+    pointer-events: none;
+  }
+  .search-wrap .clear-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--fg-faint);
+    padding: 4px 6px;
+    font-size: 16px;
+    line-height: 1;
+    border-radius: 4px;
+    display: none;
+  }
+  .search-wrap .clear-btn:hover {
+    background: var(--bg-hover);
+    color: var(--fg);
+  }
+  .search-wrap.has-value .clear-btn { display: block; }
+
+  .btn {
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--fg);
+    font-family: inherit;
+    transition: background .12s, border-color .12s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg-hover); }
+  .btn:active { background: var(--border); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+
+  /* Filtro de unidad — slot listo para escalado */
+  .unit-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+  .unit-filter select {
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .unit-filter select:focus { outline: none; }
+
+  /* ---------- Resultados de búsqueda ---------- */
+  .search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+  }
+  .search-results.open { display: block; }
+  .search-result {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .search-result:last-child { border-bottom: none; }
+  .search-result:hover, .search-result.active { background: var(--accent-soft); }
+  .search-result .sr-code {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--code-fg);
+    margin-right: 8px;
+  }
+  .search-result .sr-text { color: var(--fg); }
+  .search-result .sr-path {
+    display: block;
+    font-size: 11px;
+    color: var(--fg-faint);
+    margin-top: 2px;
+  }
+  .search-result .sr-units {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 11px;
+    color: var(--fg-muted);
+    background: var(--bg-subtle);
+    border-radius: 3px;
+    padding: 1px 6px;
+  }
+  .search-empty {
+    padding: 12px;
+    text-align: center;
+    color: var(--fg-faint);
+    font-size: 12px;
+  }
+  mark {
+    background: #fff3a8;
+    color: inherit;
+    padding: 0 1px;
+    border-radius: 2px;
+  }
+
+  /* ---------- Árbol ---------- */
+  .tree, .tree ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .tree {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px;
+    /* Llena el espacio disponible en el flex container, scroll interno si excede */
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  .tree ul {
+    /* Línea-guía sutil de jerarquía */
+    margin-left: 14px;
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+    display: none;
+  }
+  .tree li.open > ul { display: block; }
+
+  .tree li { margin: 1px 0; }
+
+  /* Nodo: header clickeable */
+  .node {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .1s;
+    color: var(--fg);
+  }
+  .node:hover { background: var(--bg-hover); }
+  .node:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    color: var(--fg-faint);
+    transition: transform .15s;
+    flex-shrink: 0;
+  }
+  .tree li.open > .node .chevron { transform: rotate(90deg); }
+  .chevron svg { width: 10px; height: 10px; }
+
+  .node-icon {
+    flex-shrink: 0;
+    color: var(--fg-muted);
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .node-icon svg { width: 14px; height: 14px; }
+  .node.is-folder .node-icon { color: var(--accent); }
+  .node.is-leaf .node-icon { color: var(--fg-faint); }
+
+  .node-label {
+    font-size: 13px;
+    color: var(--fg);
+  }
+  .node.is-folder > .node-label {
+    font-weight: 500;
+  }
+  .node.lvl-1 > .node-label { font-weight: 600; font-size: 14px; }
+  .node.lvl-2 > .node-label { font-weight: 600; }
+
+  .node-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--fg-faint);
+    background: var(--bg-subtle);
+    border-radius: 10px;
+    padding: 1px 7px;
+  }
+
+  /* Hojas (códigos) */
+  .leaf {
+    /* mismo .node, pero el contenido cambia */
+  }
+  .leaf .code-chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--code-fg);
+    background: var(--code-bg);
+    border-radius: 3px;
+    padding: 1px 7px;
+    flex-shrink: 0;
+  }
+  .leaf .leaf-desc {
+    font-size: 13px;
+    color: var(--fg);
+  }
+  .leaf .leaf-en {
+    font-size: 11px;
+    color: var(--fg-faint);
+    margin-left: 4px;
+    font-style: italic;
+  }
+
+  /* Estado seleccionado de una hoja */
+  .leaf.selected {
+    background: var(--accent-soft) !important;
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+  .leaf.selected .code-chip {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* Estado de búsqueda: oculta ramas que no matchean */
+  .tree.searching li.hidden { display: none; }
+  .tree.searching li.match-path > .node { background: var(--accent-soft); }
+
+  /* ---------- Side panel ---------- */
+  .side-panel {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--fg-muted);
+    margin: 0 0 8px;
+  }
+  /* Selección Actual: altura natural, sin scroll */
+  .panel-section.selection {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-section.selection #selectionArea {
+    flex: 0 0 auto;
+  }
+  /* Recientes: ocupa el resto, sin scroll (la cantidad de items está acotada) */
+  .panel-section.recents {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .panel-section.recents .recent-list {
+    flex: 0 0 auto;
+  }
+
+  .selection-empty {
+    color: var(--fg-faint);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .selection-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+  }
+  .selection-card .sel-code {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--code-fg);
+    margin-bottom: 4px;
+  }
+  .selection-card .sel-desc {
+    font-size: 13px;
+    color: var(--fg);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .selection-card .sel-en {
+    font-size: 12px;
+    color: var(--fg-muted);
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+
+  .copy-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .copy-feedback {
+    font-size: 11px;
+    color: #1a7a3f;
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .copy-feedback.show { opacity: 1; }
+
+  /* Recientes */
+  .recent-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .recent-list li button {
+    width: 100%;
+    text-align: left;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .1s;
+  }
+  .recent-list li button:hover { background: var(--bg-hover); }
+  .recent-list .rc-code {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--code-fg);
+    flex-shrink: 0;
+  }
+  .recent-list .rc-desc {
+    color: var(--fg-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .recent-empty {
+    color: var(--fg-faint);
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  /* dataset sin traducción EN: ocultar líneas en inglés vacías */
+  .leaf .leaf-en:empty { display: none; }
+  .selection-card .sel-en:empty { display: none; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Modos de falla GADS NERC</h1>
+</header>
+
+<div class="layout">
+
+  <main>
+
+    <div class="toolbar">
+      <div class="search-wrap" id="searchWrap">
+        <span class="search-icon" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <input type="text" id="search" placeholder="Buscar por código o descripción (ej. 85, corrosión, vibración)" autocomplete="off">
+        <button class="clear-btn" id="clearBtn" aria-label="Limpiar búsqueda">×</button>
+        <div class="search-results" id="searchResults" role="listbox"></div>
+      </div>
+
+      <button class="btn" id="expandAll" type="button">Expandir todo</button>
+      <button class="btn" id="collapseAll" type="button">Colapsar todo</button>
+    </div>
+
+    <nav class="nav-crumbs" id="navCrumbs" aria-label="Ruta de navegación actual">
+      <span class="nav-label">Ruta:</span>
+      <span class="nav-empty">Ningún nodo expandido</span>
+    </nav>
+
+    <ul class="tree" id="tree" role="tree" aria-label="Jerarquía de modos de falla">
+<li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">00 Modo de falla desconocido - investigación en curso</span><span class="node-count">1</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">00 Modo de falla desconocido - investigación en curso</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="84" data-desc="desconocido - investigación en curso (cambiar este código una vez se determine el mecanismo de falla)" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">84</span><span class="leaf-desc">desconocido - investigación en curso (cambiar este código una vez se determine el mecanismo de falla)</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">01 Modos de falla para eventos tipo &quot;Salida Forzada Inmediata (U1)&quot;</span><span class="node-count">2</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">01 Modos de falla para eventos tipo &quot;Salida Forzada Inmediata (U1)&quot;</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="T1" data-desc="Desconexión de la red. Unidad de generación trippeada, disparada o detenida de modo automático." data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">T1</span><span class="leaf-desc">Desconexión de la red. Unidad de generación trippeada, disparada o detenida de modo automático.</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="T2" data-desc="Desconexión de la red. Unidad de generación trippeada, disparada o detenida de modo manual" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">T2</span><span class="leaf-desc">Desconexión de la red. Unidad de generación trippeada, disparada o detenida de modo manual</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">02 Modos de falla para eventos tipo &quot;Reducción de Potencia Inmediata (D1)&quot;</span><span class="node-count">2</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">02 Modos de falla para eventos tipo &quot;Reducción de Potencia Inmediata (D1)&quot;</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="82" data-desc="Reducción de potencia por componente trippeado, disparado o detenido de forma automática." data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">82</span><span class="leaf-desc">Reducción de potencia por componente trippeado, disparado o detenido de forma automática.</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="83" data-desc="Reducción de potencia por componente trippeado, disparado o detenido de forma manual." data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">83</span><span class="leaf-desc">Reducción de potencia por componente trippeado, disparado o detenido de forma manual.</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">03 Modos de falla para eventos externos (fuera gestión de planta)</span><span class="node-count">6</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Externo - Agua</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="WC" data-desc="condición del agua subterránea o curso del río" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">WC</span><span class="leaf-desc">condición del agua subterránea o curso del río</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Externo - Ambiental</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="E0" data-desc="restricción ambiental de emisiones" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">E0</span><span class="leaf-desc">restricción ambiental de emisiones</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Externo - Combustible</span><span class="node-count">3</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="FR" data-desc="relacionado a calidad combustible" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">FR</span><span class="leaf-desc">relacionado a calidad combustible</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="NF" data-desc="sin combustible" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">NF</span><span class="leaf-desc">sin combustible</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="W0" data-desc="carbón mojado/congelado/debris" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">W0</span><span class="leaf-desc">carbón mojado/congelado/debris</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Externo - Equipos</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="X0" data-desc="malfuncionamiento de equipo externo" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">X0</span><span class="leaf-desc">malfuncionamiento de equipo externo</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">04 Modos de falla para eventos tipo &quot;Mantenimiento&quot;</span><span class="node-count">7</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">04 Modos de falla para eventos tipo &quot;Mantenimiento&quot;</span><span class="node-count">7</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="53" data-desc="mantenimiento - inspección" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">53</span><span class="leaf-desc">mantenimiento - inspección</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="58" data-desc="mantenimiento - reparación" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">58</span><span class="leaf-desc">mantenimiento - reparación</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="59" data-desc="mantenimiento - general" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">59</span><span class="leaf-desc">mantenimiento - general</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="61" data-desc="modificación(es)" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">61</span><span class="leaf-desc">modificación(es)</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="79" data-desc="pruebas" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">79</span><span class="leaf-desc">pruebas</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="C0" data-desc="limpieza" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">C0</span><span class="leaf-desc">limpieza</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="U0" data-desc="piezas no disponibles" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">U0</span><span class="leaf-desc">piezas no disponibles</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">05 Modos de falla Incendio, Explosión y Combustión</span><span class="node-count">6</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Explosión</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="44" data-desc="daño por explosión - iniciado por el componente" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">44</span><span class="leaf-desc">daño por explosión - iniciado por el componente</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="45" data-desc="daño por explosión - no iniciado por el componente" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">45</span><span class="leaf-desc">daño por explosión - no iniciado por el componente</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Incendio</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="07" data-desc="daños por incendio/quema - iniciados por el componente" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">07</span><span class="leaf-desc">daños por incendio/quema - iniciados por el componente</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="08" data-desc="daños por incendio/quema - no iniciados por el componente" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">08</span><span class="leaf-desc">daños por incendio/quema - no iniciados por el componente</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Combustión</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="46" data-desc="sin llama o apagado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">46</span><span class="leaf-desc">sin llama o apagado</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="R0" data-desc="fuego" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">R0</span><span class="leaf-desc">fuego</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">06 Modos de falla Mecánicos</span><span class="node-count">29</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Defectos de material</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="60" data-desc="defectos de material" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">60</span><span class="leaf-desc">defectos de material</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Grietas y daños</span><span class="node-count">6</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="06" data-desc="rotura" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">06</span><span class="leaf-desc">rotura</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="28" data-desc="agrietado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">28</span><span class="leaf-desc">agrietado</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="30" data-desc="dañado - objeto extraño" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">30</span><span class="leaf-desc">dañado - objeto extraño</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="31" data-desc="dañado - aislamiento" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">31</span><span class="leaf-desc">dañado - aislamiento</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="51" data-desc="daño por impacto" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">51</span><span class="leaf-desc">daño por impacto</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="68" data-desc="daño secundario o consecuencia de otra falla" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">68</span><span class="leaf-desc">daño secundario o consecuencia de otra falla</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Alineado y balanceado</span><span class="node-count">4</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="01" data-desc="alineación/holgura fuera de los límites - Axial" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">01</span><span class="leaf-desc">alineación/holgura fuera de los límites - Axial</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="02" data-desc="alineación/holgura fuera de los límites - Radial" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">02</span><span class="leaf-desc">alineación/holgura fuera de los límites - Radial</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="04" data-desc="balance - fuera de los límites (desbalance)" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">04</span><span class="leaf-desc">balance - fuera de los límites (desbalance)</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="55" data-desc="perdido o suelto" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">55</span><span class="leaf-desc">perdido o suelto</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Movimiento rotativo</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="05" data-desc="bloqueo rotación" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">05</span><span class="leaf-desc">bloqueo rotación</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Movimiento lineal</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="67" data-desc="daño por roce dirección longitudinal" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">67</span><span class="leaf-desc">daño por roce dirección longitudinal</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="69" data-desc="atascado (sin movimiento)" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">69</span><span class="leaf-desc">atascado (sin movimiento)</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Fluidos y fugas</span><span class="node-count">4</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="12" data-desc="obstruido (no permite el flujo)" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">12</span><span class="leaf-desc">obstruido (no permite el flujo)</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="54" data-desc="fugas" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">54</span><span class="leaf-desc">fugas</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="66" data-desc="presión fuera de los límites" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">66</span><span class="leaf-desc">presión fuera de los límites</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="D0" data-desc="inducción de agua (ingreso de agua a un lugar que no debe)" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">D0</span><span class="leaf-desc">inducción de agua (ingreso de agua a un lugar que no debe)</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Lubricación y rozamiento</span><span class="node-count">3</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="56" data-desc="lubricación - excesiva" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">56</span><span class="leaf-desc">lubricación - excesiva</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="57" data-desc="lubricación - insuficiente" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">57</span><span class="leaf-desc">lubricación - insuficiente</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="93" data-desc="desgaste - excesivo" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">93</span><span class="leaf-desc">desgaste - excesivo</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Vibración y ruido</span><span class="node-count">4</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="62" data-desc="ruidoso" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">62</span><span class="leaf-desc">ruidoso</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="85" data-desc="vibración - fuera de los límites" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">85</span><span class="leaf-desc">vibración - fuera de los límites</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="86" data-desc="fatiga por vibración que lleva a la falla" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">86</span><span class="leaf-desc">fatiga por vibración que lleva a la falla</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="V0" data-desc="vibración - (otra)" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">V0</span><span class="leaf-desc">vibración - (otra)</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Soldadura</span><span class="node-count">3</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="89" data-desc="falla de soldadura - soldadura rota" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">89</span><span class="leaf-desc">falla de soldadura - soldadura rota</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="90" data-desc="falla de soldadura - metales disímiles" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">90</span><span class="leaf-desc">falla de soldadura - metales disímiles</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="91" data-desc="falla de soldadura - defectos de soldadura" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">91</span><span class="leaf-desc">falla de soldadura - defectos de soldadura</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Corte</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="81" data-desc="rasgado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">81</span><span class="leaf-desc">rasgado</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">07 Modos de falla Térmicos</span><span class="node-count">12</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Baja temperatura</span><span class="node-count">3</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="19" data-desc="enfriamiento por agua inadecuado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">19</span><span class="leaf-desc">enfriamiento por agua inadecuado</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="20" data-desc="enfriamiento por aire inadecuado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">20</span><span class="leaf-desc">enfriamiento por aire inadecuado</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="48" data-desc="congelado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">48</span><span class="leaf-desc">congelado</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Alta temperatura</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="29" data-desc="creep por alta temperatura" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">29</span><span class="leaf-desc">creep por alta temperatura</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="H0" data-desc="temperatura alta fuera de los límites" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">H0</span><span class="leaf-desc">temperatura alta fuera de los límites</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Velocidad temperatura</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="71" data-desc="sobrecalentamiento en poco tiempo" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">71</span><span class="leaf-desc">sobrecalentamiento en poco tiempo</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Ciclos de temperatura</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="80" data-desc="fatiga térmica" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">80</span><span class="leaf-desc">fatiga térmica</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Temperatura fuera de límites de proceso</span><span class="node-count">5</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="74" data-desc="temperatura fuera de los límites - compresor" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">74</span><span class="leaf-desc">temperatura fuera de los límites - compresor</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="75" data-desc="temperatura fuera de los límites - escape" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">75</span><span class="leaf-desc">temperatura fuera de los límites - escape</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="76" data-desc="temperatura fuera de los límites - aceite" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">76</span><span class="leaf-desc">temperatura fuera de los límites - aceite</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="77" data-desc="temperatura fuera de los límites - espaciadores de ruedas" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">77</span><span class="leaf-desc">temperatura fuera de los límites - espaciadores de ruedas</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="78" data-desc="temperatura fuera de los límites - otras partes" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">78</span><span class="leaf-desc">temperatura fuera de los límites - otras partes</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">08 Modos de falla Eléctricos</span><span class="node-count">9</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Eléctrico</span><span class="node-count">7</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="03" data-desc="arco/sobrecarga eléctrica" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">03</span><span class="leaf-desc">arco/sobrecarga eléctrica</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="16" data-desc="desconexión o perdida de conexión" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">16</span><span class="leaf-desc">desconexión o perdida de conexión</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="49" data-desc="componente eléctrico a tierra" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">49</span><span class="leaf-desc">componente eléctrico a tierra</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="50" data-desc="daño por hidrógeno" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">50</span><span class="leaf-desc">daño por hidrógeno</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="70" data-desc="componente eléctrico en cortocircuito" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">70</span><span class="leaf-desc">componente eléctrico en cortocircuito</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="87" data-desc="voltaje fuera de los límites" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">87</span><span class="leaf-desc">voltaje fuera de los límites</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="88" data-desc="contactos de relé soldados" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">88</span><span class="leaf-desc">contactos de relé soldados</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Instrumentación</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="09" data-desc="calibración - fuera de los límites" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">09</span><span class="leaf-desc">calibración - fuera de los límites</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="52" data-desc="indicación falsa" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">52</span><span class="leaf-desc">indicación falsa</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">09 Modos de falla Operativos</span><span class="node-count">10</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Personas o procedimientos</span><span class="node-count">1</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="P0" data-desc="error de personal o procedimiento" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">P0</span><span class="leaf-desc">error de personal o procedimiento</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Comportamiento errático</span><span class="node-count">4</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="40" data-desc="errático - operación inexplicable" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">40</span><span class="leaf-desc">errático - operación inexplicable</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="41" data-desc="errático - circuito" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">41</span><span class="leaf-desc">errático - circuito</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="42" data-desc="errático - operario" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">42</span><span class="leaf-desc">errático - operario</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="43" data-desc="errático - cableado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">43</span><span class="leaf-desc">errático - cableado</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Arranque y parada</span><span class="node-count">2</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="33" data-desc="falla al desacoplar, no se logra desacoplar" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">33</span><span class="leaf-desc">falla al desacoplar, no se logra desacoplar</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="34" data-desc="falla al acoplar, no se logra acoplar" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">34</span><span class="leaf-desc">falla al acoplar, no se logra acoplar</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Servicio</span><span class="node-count">3</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="13" data-desc="cerrado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">13</span><span class="leaf-desc">cerrado</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="63" data-desc="abierto" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">63</span><span class="leaf-desc">abierto</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="64" data-desc="sobrecarga" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">64</span><span class="leaf-desc">sobrecarga</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">10 Modos de falla Químicos</span><span class="node-count">13</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Corrosión</span><span class="node-count">9</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="21" data-desc="corrosión - general" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">21</span><span class="leaf-desc">corrosión - general</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="22" data-desc="corrosión - cáustica" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">22</span><span class="leaf-desc">corrosión - cáustica</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="23" data-desc="corrosión - fatiga" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">23</span><span class="leaf-desc">corrosión - fatiga</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="24" data-desc="corrosión - ceniza de carbón a alta temperatura" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">24</span><span class="leaf-desc">corrosión - ceniza de carbón a alta temperatura</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="25" data-desc="corrosión - ceniza de aceite a alta temperatura" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">25</span><span class="leaf-desc">corrosión - ceniza de aceite a alta temperatura</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="26" data-desc="corrosión - baja temperatura" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">26</span><span class="leaf-desc">corrosión - baja temperatura</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="27" data-desc="corrosión - lado del fuego de la pared de agua" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">27</span><span class="leaf-desc">corrosión - lado del fuego de la pared de agua</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="65" data-desc="pitting (corrosión localizada)" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">65</span><span class="leaf-desc">pitting (corrosión localizada)</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="73" data-desc="agrietamiento por corrosión" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">73</span><span class="leaf-desc">agrietamiento por corrosión</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Químico</span><span class="node-count">4</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="11" data-desc="daño por excursión química" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">11</span><span class="leaf-desc">daño por excursión química</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="A0" data-desc="restricción de sílice" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">A0</span><span class="leaf-desc">restricción de sílice</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="S0" data-desc="formación de escoria" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">S0</span><span class="leaf-desc">formación de escoria</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="ST" data-desc="transferencia de vapor" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">ST</span><span class="leaf-desc">transferencia de vapor</span></div></li></ul></li></ul></li><li class="" data-level="1"><div class="node is-folder lvl-1" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">11 Modos de falla Físicos</span><span class="node-count">15</span></div><ul><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Contaminación</span><span class="node-count">3</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="10" data-desc="cubierto de carbón" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">10</span><span class="leaf-desc">cubierto de carbón</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="17" data-desc="contaminado por líquidos" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">17</span><span class="leaf-desc">contaminado por líquidos</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="18" data-desc="contaminado por metales y sólidos" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">18</span><span class="leaf-desc">contaminado por metales y sólidos</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Erosión</span><span class="node-count">5</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="35" data-desc="erosión - partícula de carbón" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">35</span><span class="leaf-desc">erosión - partícula de carbón</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="36" data-desc="erosión - escoria caída" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">36</span><span class="leaf-desc">erosión - escoria caída</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="37" data-desc="erosión - soplado de hollín" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">37</span><span class="leaf-desc">erosión - soplado de hollín</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="38" data-desc="erosión - ceniza volante" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">38</span><span class="leaf-desc">erosión - ceniza volante</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="39" data-desc="erosión - causa desconocida" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">39</span><span class="leaf-desc">erosión - causa desconocida</span></div></li></ul></li><li class="" data-level="2"><div class="node is-folder lvl-2" tabindex="0" role="treeitem" aria-expanded="false"><span class="chevron"><svg viewBox="0 0 10 10" fill="none"><path d="M3 1l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4a1 1 0 0 1 1-1h3.5l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/></svg></span><span class="node-label">Físico</span><span class="node-count">7</span></div><ul><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="14" data-desc="condensación de aceite" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">14</span><span class="leaf-desc">condensación de aceite</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="15" data-desc="condensación de agua" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">15</span><span class="leaf-desc">condensación de agua</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="32" data-desc="sucio - contaminación por aire" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">32</span><span class="leaf-desc">sucio - contaminación por aire</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="47" data-desc="formación de espuma" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">47</span><span class="leaf-desc">formación de espuma</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="72" data-desc="pegajoso" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">72</span><span class="leaf-desc">pegajoso</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="92" data-desc="borrado" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">92</span><span class="leaf-desc">borrado</span></div></li><li><div class="node leaf is-leaf" tabindex="0" role="treeitem" data-code="F0" data-desc="suciedad" data-en=""><span class="chevron" aria-hidden="true"></span><span class="node-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 7l4.5-4.5h5a1 1 0 0 1 1 1v5L8.5 13a1 1 0 0 1-1.4 0L2.5 8.4a1 1 0 0 1 0-1.4z"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></span><span class="code-chip">F0</span><span class="leaf-desc">suciedad</span></div></li></ul></li></ul></li>
+    </ul>
+
+  </main>
+
+  <aside class="side-panel">
+
+    <div class="panel-section selection">
+      <h2 class="panel-title">Selección actual</h2>
+      <div id="selectionArea">
+        <div class="selection-empty">Hacé clic en un código para seleccionarlo.</div>
+      </div>
+    </div>
+
+    <div class="panel-section recents">
+      <h2 class="panel-title">Recientes (esta sesión)</h2>
+      <ul class="recent-list" id="recentList">
+        <li class="recent-empty">Aún no hay códigos consultados.</li>
+      </ul>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // ESTADO
+  // ============================================================
+  const tree = document.getElementById('tree');
+  const searchInput = document.getElementById('search');
+  const searchWrap = document.getElementById('searchWrap');
+  const searchResults = document.getElementById('searchResults');
+  const clearBtn = document.getElementById('clearBtn');
+  const expandAllBtn = document.getElementById('expandAll');
+  const collapseAllBtn = document.getElementById('collapseAll');
+  const selectionArea = document.getElementById('selectionArea');
+  const recentList = document.getElementById('recentList');
+  const navCrumbs = document.getElementById('navCrumbs');
+
+  // Último folder expandido por click (referencia para el breadcrumb de navegación)
+  let lastExpandedFolder = null;
+
+  // Recientes en memoria (no localStorage — iframes SharePoint a veces lo bloquean)
+  const recents = [];
+  const MAX_RECENTS = 4;
+  let activeResultIdx = -1;
+
+  // ============================================================
+  // INDICE DE HOJAS — base para búsqueda y deduplicación futura
+  // ============================================================
+  // Estructura preparada para escalar: cuando haya múltiples unidades,
+  // un mismo código puede aparecer con varias `units`, que se mostrarán
+  // agrupadas en la búsqueda (resuelve el punto 2 del agente).
+  const leafIndex = (function buildIndex() {
+    const idx = new Map(); // code -> { code, desc, en, paths: [{units, path}] }
+    tree.querySelectorAll('.leaf').forEach(leaf => {
+      const code = leaf.dataset.code;
+      const desc = leaf.dataset.desc;
+      const en   = leaf.dataset.en;
+      const path = computePath(leaf);
+      if (!idx.has(code)) {
+        idx.set(code, { code, desc, en, paths: [], el: leaf });
+      }
+      idx.get(code).paths.push({ unit: path[0], path });
+    });
+    return idx;
+  })();
+
+  // ============================================================
+  // UTILIDADES
+  // ============================================================
+  function computePath(el) {
+    // Recorre hacia arriba y junta las etiquetas de cada nodo ancestro
+    const parts = [];
+    let cur = el.closest('li').parentElement.closest('li');
+    while (cur) {
+      const label = cur.querySelector(':scope > .node > .node-label');
+      if (label) parts.unshift(label.textContent.trim());
+      cur = cur.parentElement.closest('li');
+    }
+    return parts;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function highlight(text, term) {
+    if (!term) return escapeHtml(text);
+    const escaped = escapeHtml(text);
+    const safeTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return escaped.replace(new RegExp(safeTerm, 'gi'), m => `<mark>${m}</mark>`);
+  }
+
+  // ============================================================
+  // BREADCRUMB DE NAVEGACIÓN (arriba del árbol)
+  // Refleja el último folder expandido por click. Si ese folder
+  // se cerró o ya no está abierto, retrocede al ancestro abierto
+  // más profundo. Si no hay nada abierto, muestra estado vacío.
+  // ============================================================
+  function updateNavCrumbs() {
+    // Si el último folder expandido sigue abierto, lo usamos.
+    // Si no, buscamos el folder abierto más profundo del árbol.
+    let target = null;
+    if (lastExpandedFolder && lastExpandedFolder.classList.contains('open') && tree.contains(lastExpandedFolder)) {
+      target = lastExpandedFolder;
+    } else {
+      // Fallback: el folder abierto más profundo
+      const openFolders = tree.querySelectorAll('li.open');
+      let maxDepth = -1;
+      openFolders.forEach(li => {
+        const depth = parseInt(li.dataset.level || '0', 10);
+        if (depth > maxDepth) {
+          maxDepth = depth;
+          target = li;
+        }
+      });
+    }
+
+    if (!target) {
+      navCrumbs.innerHTML = '<span class="nav-label">Ruta:</span><span class="nav-empty">Ningún nodo expandido</span>';
+      return;
+    }
+
+    // Armar el path desde la raíz hasta el target (incluido)
+    const path = [];
+    let cur = target;
+    while (cur && cur !== tree) {
+      const label = cur.querySelector(':scope > .node > .node-label');
+      if (label) path.unshift({ el: cur, text: label.textContent.trim() });
+      cur = cur.parentElement.closest('li');
+    }
+
+    const html = ['<span class="nav-label">Ruta:</span>'];
+    path.forEach((p, i) => {
+      if (i > 0) html.push('<span class="nav-sep">›</span>');
+      html.push(`<button class="nav-crumb" type="button" data-crumb-idx="${i}">${escapeHtml(p.text)}</button>`);
+    });
+    navCrumbs.innerHTML = html.join('');
+
+    // Click en un segmento del breadcrumb: scroll al nodo
+    navCrumbs.querySelectorAll('.nav-crumb').forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        const node = path[i].el.querySelector(':scope > .node');
+        if (node) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+  }
+
+  // ============================================================
+  // ÁRBOL: toggle, expandir/colapsar
+  // ============================================================
+  tree.addEventListener('click', function (e) {
+    const node = e.target.closest('.node');
+    if (!node) return;
+    const li = node.closest('li');
+
+    if (node.classList.contains('is-folder')) {
+      li.classList.toggle('open');
+      const isOpen = li.classList.contains('open');
+      node.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      // Si lo acabamos de abrir, queda como referencia del breadcrumb
+      if (isOpen) lastExpandedFolder = li;
+      updateNavCrumbs();
+    } else if (node.classList.contains('is-leaf')) {
+      selectLeaf(node);
+    }
+  });
+
+  tree.addEventListener('keydown', function (e) {
+    const node = e.target.closest('.node');
+    if (!node) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      node.click();
+    }
+  });
+
+  expandAllBtn.addEventListener('click', () => {
+    tree.querySelectorAll('li').forEach(li => {
+      if (li.querySelector(':scope > ul')) {
+        li.classList.add('open');
+        const n = li.querySelector(':scope > .node');
+        if (n) n.setAttribute('aria-expanded', 'true');
+      }
+    });
+    // Tras expandir todo, no hay un "último click" claro: reseteamos
+    // para que updateNavCrumbs use el fallback (folder más profundo)
+    lastExpandedFolder = null;
+    updateNavCrumbs();
+  });
+
+  collapseAllBtn.addEventListener('click', () => {
+    tree.querySelectorAll('li').forEach(li => {
+      if (li.querySelector(':scope > ul')) {
+        li.classList.remove('open');
+        const n = li.querySelector(':scope > .node');
+        if (n) n.setAttribute('aria-expanded', 'false');
+      }
+    });
+    lastExpandedFolder = null;
+    updateNavCrumbs();
+  });
+
+  // ============================================================
+  // SELECCIÓN: feedback + copiar + breadcrumb (puntos 1 y 3 del agente)
+  // ============================================================
+  function selectLeaf(leafEl) {
+    tree.querySelectorAll('.leaf.selected').forEach(el => el.classList.remove('selected'));
+    leafEl.classList.add('selected');
+
+    const code = leafEl.dataset.code;
+    const desc = leafEl.dataset.desc;
+    const en   = leafEl.dataset.en;
+    const path = computePath(leafEl);
+
+    renderSelection({ code, desc, en, path });
+    addRecent({ code, desc });
+  }
+
+  function renderSelection(sel) {
+    selectionArea.innerHTML = `
+      <div class="selection-card">
+        <div class="sel-code">${escapeHtml(sel.code)}</div>
+        <div class="sel-desc">${escapeHtml(sel.desc)}</div>
+        <div class="sel-en">${escapeHtml(sel.en)}</div>
+        <div class="copy-actions">
+          <button class="btn btn-primary" data-copy="code">Copiar código</button>
+        </div>
+        <div class="copy-feedback" id="copyFeedback">Copiado ✓</div>
+      </div>
+    `;
+
+    selectionArea.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        copyToClipboard(sel.code);
+      });
+    });
+  }
+
+  function copyToClipboard(text) {
+    const fb = document.getElementById('copyFeedback');
+    const showOk = () => {
+      if (!fb) return;
+      fb.classList.add('show');
+      setTimeout(() => fb.classList.remove('show'), 1400);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showOk).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+
+    function fallbackCopy() {
+      // Fallback para iframes con permissions-policy restrictiva
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showOk(); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  // ============================================================
+  // RECIENTES (punto 10 del agente — in-memory, sesión)
+  // ============================================================
+  function addRecent(item) {
+    const existingIdx = recents.findIndex(r => r.code === item.code);
+    if (existingIdx >= 0) recents.splice(existingIdx, 1);
+    recents.unshift(item);
+    if (recents.length > MAX_RECENTS) recents.length = MAX_RECENTS;
+    renderRecents();
+  }
+
+  function renderRecents() {
+    if (recents.length === 0) {
+      recentList.innerHTML = '<li class="recent-empty">Aún no hay códigos consultados.</li>';
+      return;
+    }
+    recentList.innerHTML = recents.map(r => `
+      <li>
+        <button data-code="${escapeHtml(r.code)}">
+          <span class="rc-code">${escapeHtml(r.code)}</span>
+          <span class="rc-desc">${escapeHtml(r.desc)}</span>
+        </button>
+      </li>
+    `).join('');
+    recentList.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const entry = leafIndex.get(btn.dataset.code);
+        if (entry) {
+          revealAndSelect(entry.el);
+        }
+      });
+    });
+  }
+
+  // ============================================================
+  // BÚSQUEDA — con resaltado, dedup y filtrado del árbol
+  // ============================================================
+  function doSearch(term) {
+    term = term.trim().toLowerCase();
+    if (!term) {
+      searchResults.classList.remove('open');
+      searchResults.innerHTML = '';
+      tree.classList.remove('searching');
+      tree.querySelectorAll('li.hidden, li.match-path').forEach(li => {
+        li.classList.remove('hidden', 'match-path');
+      });
+      return;
+    }
+
+    // Buscar en el índice (preparado para dedup futuro)
+    const hits = [];
+    leafIndex.forEach((entry, code) => {
+      const haystack = `${code} ${entry.desc} ${entry.en}`.toLowerCase();
+      if (haystack.includes(term)) {
+        hits.push(entry);
+      }
+    });
+
+    // Dropdown
+    if (hits.length === 0) {
+      searchResults.innerHTML = '<div class="search-empty">Sin resultados</div>';
+    } else {
+      searchResults.innerHTML = hits.slice(0, 20).map((h, i) => {
+        const pathStr = h.paths[0].path.join(' › ');
+        // Cuando haya múltiples unidades, mostrar resumen entre paréntesis
+        const unitsBadge = h.paths.length > 1
+          ? `<span class="sr-units">${h.paths.map(p => p.unit).join(', ')}</span>`
+          : '';
+        return `
+          <div class="search-result" data-code="${escapeHtml(h.code)}" data-idx="${i}">
+            <div>
+              <span class="sr-code">${highlight(h.code, term)}</span>
+              <span class="sr-text">${highlight(h.desc, term)}</span>
+              ${unitsBadge}
+            </div>
+            <span class="sr-path">${escapeHtml(pathStr)}</span>
+          </div>
+        `;
+      }).join('');
+      searchResults.querySelectorAll('.search-result').forEach(div => {
+        div.addEventListener('click', () => {
+          const entry = leafIndex.get(div.dataset.code);
+          if (entry) revealAndSelect(entry.el);
+        });
+      });
+    }
+    searchResults.classList.add('open');
+
+    // Filtrar también el árbol: ocultar hojas que no matchean,
+    // marcar el path de las que sí.
+    tree.classList.add('searching');
+    const matchSet = new Set(hits.map(h => h.el));
+    tree.querySelectorAll('li').forEach(li => li.classList.remove('hidden', 'match-path'));
+    tree.querySelectorAll('.leaf').forEach(leaf => {
+      const li = leaf.closest('li');
+      if (matchSet.has(leaf)) {
+        // Marcar y expandir todos los ancestros
+        let cur = li;
+        while (cur && cur !== tree) {
+          cur.classList.add('match-path');
+          if (cur.querySelector(':scope > ul')) cur.classList.add('open');
+          cur = cur.parentElement.closest('li');
+        }
+      } else {
+        li.classList.add('hidden');
+      }
+    });
+    // Ocultar carpetas que quedaron sin hijos visibles
+    tree.querySelectorAll('li').forEach(li => {
+      const sub = li.querySelector(':scope > ul');
+      if (sub && !li.classList.contains('match-path')) {
+        li.classList.add('hidden');
+      }
+    });
+  }
+
+  function revealAndSelect(leafEl) {
+    // Expandir todos los ancestros
+    let cur = leafEl.closest('li').parentElement.closest('li');
+    let deepestFolder = null;
+    while (cur) {
+      cur.classList.add('open');
+      const n = cur.querySelector(':scope > .node');
+      if (n) n.setAttribute('aria-expanded', 'true');
+      if (!deepestFolder) deepestFolder = cur; // primero en la iteración = el más profundo (la hoja se cuelga de él)
+      cur = cur.parentElement.closest('li');
+    }
+    if (deepestFolder) lastExpandedFolder = deepestFolder;
+    updateNavCrumbs();
+
+    selectLeaf(leafEl);
+    leafEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Cerrar dropdown
+    searchResults.classList.remove('open');
+  }
+
+  searchInput.addEventListener('input', function () {
+    searchWrap.classList.toggle('has-value', this.value.length > 0);
+    doSearch(this.value);
+  });
+
+  searchInput.addEventListener('focus', function () {
+    if (this.value.trim().length > 0 && searchResults.innerHTML) {
+      searchResults.classList.add('open');
+    }
+  });
+
+  // Cerrar dropdown al hacer click fuera
+  document.addEventListener('click', function (e) {
+    if (!searchWrap.contains(e.target)) {
+      searchResults.classList.remove('open');
+    }
+  });
+
+  clearBtn.addEventListener('click', function () {
+    searchInput.value = '';
+    searchWrap.classList.remove('has-value');
+    doSearch('');
+    searchInput.focus();
+  });
+
+  // Navegación con teclado en el dropdown
+  searchInput.addEventListener('keydown', function (e) {
+    const results = searchResults.querySelectorAll('.search-result');
+    if (results.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeResultIdx = Math.min(activeResultIdx + 1, results.length - 1);
+      updateActiveResult(results);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeResultIdx = Math.max(activeResultIdx - 1, 0);
+      updateActiveResult(results);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const target = activeResultIdx >= 0 ? results[activeResultIdx] : results[0];
+      if (target) target.click();
+    } else if (e.key === 'Escape') {
+      searchInput.value = '';
+      searchWrap.classList.remove('has-value');
+      doSearch('');
+    }
+  });
+
+  function updateActiveResult(results) {
+    results.forEach((r, i) => r.classList.toggle('active', i === activeResultIdx));
+    if (activeResultIdx >= 0) {
+      results[activeResultIdx].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  // Al arrancar, los 3 niveles raíz están abiertos en el HTML.
+  // Mostramos el breadcrumb reflejando esa profundidad inicial.
+  updateNavCrumbs();
+
+})();
+</script>
+</body>
+</html>

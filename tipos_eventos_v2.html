@@ -926,24 +926,53 @@ function copyText(text) {
     setTimeout(() => feedback.classList.remove('show'), 1200);
   };
 
+  // Fallback con execCommand: el textarea debe ser realmente seleccionable
+  // dentro del iframe (no opacity:0 ni fuera de viewport, que rompen .select()
+  // en SharePoint). Devuelve true sólo si la copia tuvo éxito.
   const fallbackCopy = () => {
-    // Fallback para iframes con permissions-policy restrictiva (SharePoint)
     const ta = document.createElement('textarea');
     ta.value = text;
+    ta.setAttribute('readonly', '');
+    // Visible para el motor pero imperceptible para el usuario
     ta.style.position = 'fixed';
     ta.style.top = '0';
     ta.style.left = '0';
-    ta.style.opacity = '0';
+    ta.style.width = '1px';
+    ta.style.height = '1px';
+    ta.style.padding = '0';
+    ta.style.border = 'none';
+    ta.style.outline = 'none';
+    ta.style.boxShadow = 'none';
+    ta.style.background = 'transparent';
     document.body.appendChild(ta);
+
+    const sel = document.getSelection();
+    const savedRange = sel && sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+
     ta.focus();
     ta.select();
-    try { document.execCommand('copy'); showOk(); } catch (_) {}
+    ta.setSelectionRange(0, text.length); // iOS / iframes estrictos
+
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+
     document.body.removeChild(ta);
+    if (savedRange && sel) { sel.removeAllRanges(); sel.addRange(savedRange); }
+
+    if (ok) showOk();
+    return ok;
   };
 
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(showOk).catch(fallbackCopy);
-  } else {
+  // En iframes con permissions-policy restrictiva, writeText puede LANZAR
+  // de forma síncrona (no sólo rechazar la promesa), así que lo envolvemos
+  // en try/catch y caemos al fallback ante cualquier fallo.
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showOk).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  } catch (_) {
     fallbackCopy();
   }
 }

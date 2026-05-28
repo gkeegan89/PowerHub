@@ -919,12 +919,33 @@ function renderSelection(node) {
 }
 
 function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => {
+  const showOk = () => {
     const feedback = document.getElementById('copyFeedback');
     if (!feedback) return;
     feedback.classList.add('show');
     setTimeout(() => feedback.classList.remove('show'), 1200);
-  });
+  };
+
+  const fallbackCopy = () => {
+    // Fallback para iframes con permissions-policy restrictiva (SharePoint)
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); showOk(); } catch (_) {}
+    document.body.removeChild(ta);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showOk).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
 }
 
 function addRecent(node) {

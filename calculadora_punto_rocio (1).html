@@ -93,12 +93,12 @@
       <div class="card">
         <h2>Salto de presión y condiciones</h2>
         <div class="cond">
-          <div class="fld"><label>Presión de ingreso a planta (bar abs)</label><input id="Pin" type="number" step="any" value="50"></div>
-          <div class="fld"><label>Presión en cámara de combustión (bar abs)</label><input id="Pcam" type="number" step="any" value="16"></div>
-          <div class="fld"><label>Temperatura del gas (°C)</label><input id="Top" type="number" step="any" value="10"></div>
+          <div class="fld"><label>Presión ingreso a planta (bar abs)</label><input id="Pin" type="number" step="any" value="50"></div>
+          <div class="fld"><label>Presión a la entrada del skid turbina (bar abs)</label><input id="Pcam" type="number" step="any" value="16"></div>
+          <div class="fld"><label>Temperatura del gas a la entrada del skid turbina (°C)</label><input id="Top" type="number" step="any" value="10"></div>
           <div class="fld"><label>Margen del fabricante (°C)</label><input id="Marg" type="number" step="any" value="15"></div>
         </div>
-        <p class="saltohint">El gas entra al gasoducto a la presión de ingreso y la línea reguladora la baja hasta la presión de cámara. El rocío cambia con la presión, así que la herramienta busca el <b>peor punto de rocío a lo largo de todo el salto</b> — ese es el valor representativo.</p>
+        <p class="saltohint">El gas entra al gasoducto a la presión de ingreso y la línea reguladora la baja hasta la presión de entrada del skid turbina de gas. El rocío cambia con la presión, así que la herramienta busca el <b>peor punto de rocío a lo largo de todo el salto</b> — ese es el valor representativo.</p>
         <button class="btn" id="btn-calc">Calcular punto de rocío</button>
       </div>
     </div>
@@ -115,7 +115,7 @@
               <div class="sub2" id="o-din-p"></div>
             </div>
             <div class="campo">
-              <div class="k">Rocío a presión de cámara</div>
+              <div class="k">Rocío a presión de skid gas</div>
               <div class="v"><span id="o-dca">–</span> <small>°C</small></div>
               <div class="sub2" id="o-dca-p"></div>
             </div>
@@ -234,7 +234,7 @@
       // barrido del salto para el peor caso (incluye extremos)
       var log=['Peng-Robinson (1976) · kij estándar N₂/CO₂','Composición normalizada (suma ingresada '+sIng.toFixed(2)+' % → 100 %).',''];
       log.push('Rocío @ '+Pin+' bar (ingreso): '+(Tin===null?'< -120 °C':Tin.toFixed(1)+' °C')+'  ['+dIn.steps+' pasos de T, '+dIn.ssi+' iter. EOS]');
-      log.push('Rocío @ '+Pcam+' bar (cámara): '+(Tca===null?'< -120 °C':Tca.toFixed(1)+' °C')+'  ['+dCa.steps+' pasos de T, '+dCa.ssi+' iter. EOS]');
+      log.push('Rocío @ '+Pcam+' bar (skid): '+(Tca===null?'< -120 °C':Tca.toFixed(1)+' °C')+'  ['+dCa.steps+' pasos de T, '+dCa.ssi+' iter. EOS]');
       log.push('');
       log.push('Barrido del salto ['+Plo+' → '+Phi+' bar] para el peor rocío:');
       var pmT=-999,pmP=0; var endpts=[[Pin,Tin],[Pcam,Tca]];

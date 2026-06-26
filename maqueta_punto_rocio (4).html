@@ -159,7 +159,7 @@
         <div class="blk">
           <h3>Gasoducto</h3>
           <div class="ctl">
-            <div class="lab"><span>Presión</span><span class="val"><span id="o-pgas">30</span> bar</span></div>
+            <div class="lab"><span>Presión del gas</span><span class="val"><span id="o-pgas">30</span> bar</span></div>
             <input type="range" id="i-pgas" min="20" max="70" value="30" step="1">
           </div>
           <div class="ctl">
@@ -179,9 +179,9 @@
         </div>
 
         <div class="blk">
-          <h3>Presión en entrada skid turbina de gas</h3>
+          <h3>Entrada skid turbina de gas</h3>
           <div class="ctl">
-            <div class="lab"><span>Presión</span><span class="val"><span id="o-ptg">25</span> bar</span></div>
+            <div class="lab"><span>Presión del gas</span><span class="val"><span id="o-ptg">25</span> bar</span></div>
             <input type="range" id="i-ptg" min="4" max="40" value="25" step="1">
           </div>
           <p class="nota">El gas debe llegar con esta presión al skid para poder inyectarse en las cámaras de combustión. Depende del fabricante y modelo de turbina. Al caer la presión desde el gasoducto hasta este valor, el gas se expande y se enfría (~0,5 °C por bar).</p>
@@ -204,11 +204,11 @@
           <h3 style="font-size:11px;font-weight:600;margin:0 0 6px;color:var(--tinta2);text-transform:uppercase;letter-spacing:.5px;">Condiciones ambiente</h3>
           <div class="row">
             <div class="ctl" style="margin:0;">
-              <div class="lab"><span>Presión</span><span class="val"><span id="o-pamb">1.01</span> bar</span></div>
+              <div class="lab"><span>Presión ambiente</span><span class="val"><span id="o-pamb">1.01</span> bar</span></div>
               <input type="range" id="i-pamb" min="90" max="105" value="101" step="1">
             </div>
             <div class="ctl" style="margin:0;">
-              <div class="lab"><span>Temperatura</span><span class="val"><span id="o-tamb">20</span> °C</span></div>
+              <div class="lab"><span>Temperatura ambiente</span><span class="val"><span id="o-tamb">20</span> °C</span></div>
               <input type="range" id="i-tamb" min="-10" max="45" value="20" step="1">
             </div>
           </div>

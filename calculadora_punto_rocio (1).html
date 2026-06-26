@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de punto de rocío (Peng-Robinson) — Grupo Albanesi</title>
+<style>
+  :root{
+    --amarillo:#F5B500;--amarillo-bd:#A87C00;
+    --ok:#1D9E75;--ok-bg:#E6F6EF;--ok-tx:#0F6E56;--ok-bd:#9bdcc3;
+    --warn:#EF9F27;--warn-bg:#FCF1DD;--warn-tx:#854F0B;--warn-bd:#f0d39a;
+    --bad:#E24B4A;--bad-bg:#FCEDED;--bad-tx:#A32D2D;--bad-bd:#f3b3b3;
+    --tinta:#33373D;--tinta2:#5F636B;--tinta3:#9098a1;
+    --linea:#E6E4DC;--panel:#FFFFFF;--fondo:#FBFAF3;--azul:#1769c0;--violeta:#7a51c0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--fondo);color:var(--tinta);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.45;}
+  .topbar{background:#fff;border-bottom:3px solid var(--amarillo);}
+  .topinner{max-width:1040px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:14px;}
+  .topinner img{height:38px;display:block;}
+  .topinner .ht{font-size:13px;color:var(--tinta2);font-weight:600;}
+  .wrap{max-width:1040px;margin:0 auto;padding:12px 16px 24px;}
+  h1{font-size:19px;font-weight:600;margin:0 0 1px;}
+  .sub{color:var(--tinta2);font-size:13px;margin:0 0 12px;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+  @media(max-width:760px){.cols{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--linea);border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+  .card h2{font-size:12px;font-weight:600;margin:0 0 10px;color:var(--tinta2);text-transform:uppercase;letter-spacing:.5px;}
+  .comp{display:grid;grid-template-columns:repeat(3,1fr);gap:7px 10px;}
+  .fld{display:flex;flex-direction:column;}
+  .fld label{font-size:11.5px;color:var(--tinta2);margin-bottom:2px;}
+  .fld input{width:100%;padding:5px 7px;border:1px solid var(--linea);border-radius:7px;font-size:13px;font-family:inherit;}
+  .fld input:focus{outline:none;border-color:var(--amarillo-bd);}
+  .suma{font-size:11.5px;margin-top:8px;color:var(--tinta2);}.suma b{color:var(--tinta);}
+  .cond{display:grid;grid-template-columns:1fr 1fr;gap:7px 10px;}
+  .saltohint{font-size:11px;color:var(--tinta3);margin:8px 0 0;line-height:1.4;}
+  .btn{margin-top:10px;width:100%;padding:11px;border:none;border-radius:9px;background:var(--amarillo);color:#3a2c00;font-size:14px;font-weight:700;cursor:pointer;}
+  .btn:hover{background:#e8ac00;}
+  .btnsec{margin-top:8px;width:100%;padding:8px;border:1px solid var(--linea);border-radius:8px;background:#fff;color:var(--tinta2);font-size:12.5px;font-weight:600;cursor:pointer;}
+  .res{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;}
+  .campo{border:1px solid var(--linea);border-left:5px solid var(--azul);border-radius:9px;padding:9px 12px;background:#fcfcfa;}
+  .campo .k{font-size:11.5px;color:var(--tinta2);margin-bottom:2px;line-height:1.3;}
+  .campo .v{font-size:23px;font-weight:700;line-height:1.05;}
+  .campo .v small{font-size:13px;font-weight:600;color:var(--tinta2);}
+  .campo .sub2{font-size:10.5px;color:var(--tinta3);margin-top:2px;}
+  .campo.repr{border-left-color:var(--violeta);background:#faf8fd;margin-bottom:10px;}
+  .veredicto{display:flex;align-items:flex-start;gap:11px;border-radius:10px;padding:12px 14px;border:1px solid transparent;}
+  .veredicto .ico{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .veredicto .ico svg{width:22px;height:22px;}
+  .veredicto .tt{font-size:15px;font-weight:600;margin:0;}
+  .veredicto .tx{font-size:12.5px;margin:3px 0 0;line-height:1.45;}
+  .placeholder{color:var(--tinta3);font-size:13px;text-align:center;padding:24px 8px;}
+  .nota{font-size:11px;color:var(--tinta3);margin:10px 0 0;line-height:1.45;}
+  details.detalle{margin-top:10px;border-top:1px dashed #ddd;padding-top:8px;}
+  details.detalle summary{font-size:11px;color:var(--tinta3);cursor:pointer;font-weight:600;letter-spacing:.3px;}
+  details.detalle .log{font-size:10.5px;color:var(--tinta3);line-height:1.55;margin-top:7px;
+    font-family:"Consolas","SF Mono",ui-monospace,monospace;white-space:pre-wrap;background:#fafafa;border:1px solid #eee;border-radius:7px;padding:9px 11px;}
+  .pie{font-size:11px;color:var(--tinta3);text-align:center;margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topinner">
+  <img src="data:image/png;base64,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" alt="Grupo Albanesi">
+  <span class="ht">O&amp;M Corporativo</span>
+</div></div>
+<div class="wrap">
+  <h1>Calculadora de punto de rocío de hidrocarburos</h1>
+  <p class="sub">Cálculo por ecuación de estado Peng-Robinson. Cargá la composición del gas y el salto de presión, y la herramienta calcula el punto de rocío a lo largo del salto y si hay riesgo de condensación.</p>
+
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h2>Composición del gas (% molar)</h2>
+        <div class="comp" id="comp">
+          <div class="fld"><label>Metano C1</label><input id="C1" type="number" step="any" value="90"></div>
+          <div class="fld"><label>Etano C2</label><input id="C2" type="number" step="any" value="5"></div>
+          <div class="fld"><label>Propano C3</label><input id="C3" type="number" step="any" value="2"></div>
+          <div class="fld"><label>i-Butano iC4</label><input id="iC4" type="number" step="any" value="0.3"></div>
+          <div class="fld"><label>n-Butano nC4</label><input id="nC4" type="number" step="any" value="0.4"></div>
+          <div class="fld"><label>i-Pentano iC5</label><input id="iC5" type="number" step="any" value="0.15"></div>
+          <div class="fld"><label>n-Pentano nC5</label><input id="nC5" type="number" step="any" value="0.15"></div>
+          <div class="fld"><label>Hexano C6</label><input id="C6" type="number" step="any" value="0.1"></div>
+          <div class="fld"><label>Heptano C7</label><input id="C7" type="number" step="any" value="0.05"></div>
+          <div class="fld"><label>Octano C8</label><input id="C8" type="number" step="any" value="0.02"></div>
+          <div class="fld"><label>CO₂</label><input id="CO2" type="number" step="any" value="0.8"></div>
+          <div class="fld"><label>N₂</label><input id="N2" type="number" step="any" value="1.03"></div>
+        </div>
+        <div class="suma">Suma: <b id="suma">100.00</b> % <span id="suma-msg"></span></div>
+        <button class="btnsec" id="btn-norm">Normalizar a 100 %</button>
+      </div>
+
+      <div class="card">
+        <h2>Salto de presión y condiciones</h2>
+        <div class="cond">
+          <div class="fld"><label>Presión de ingreso a planta (bar abs)</label><input id="Pin" type="number" step="any" value="50"></div>
+          <div class="fld"><label>Presión en cámara de combustión (bar abs)</label><input id="Pcam" type="number" step="any" value="16"></div>
+          <div class="fld"><label>Temperatura del gas (°C)</label><input id="Top" type="number" step="any" value="10"></div>
+          <div class="fld"><label>Margen del fabricante (°C)</label><input id="Marg" type="number" step="any" value="15"></div>
+        </div>
+        <p class="saltohint">El gas entra al gasoducto a la presión de ingreso y la línea reguladora la baja hasta la presión de cámara. El rocío cambia con la presión, así que la herramienta busca el <b>peor punto de rocío a lo largo de todo el salto</b> — ese es el valor representativo.</p>
+        <button class="btn" id="btn-calc">Calcular punto de rocío</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Resultado</h2>
+        <div id="res-vacio" class="placeholder">Cargá los datos y apretá <b>Calcular</b>.</div>
+        <div id="res" style="display:none;">
+          <div class="res">
+            <div class="campo">
+              <div class="k">Rocío a presión de ingreso</div>
+              <div class="v"><span id="o-din">–</span> <small>°C</small></div>
+              <div class="sub2" id="o-din-p"></div>
+            </div>
+            <div class="campo">
+              <div class="k">Rocío a presión de cámara</div>
+              <div class="v"><span id="o-dca">–</span> <small>°C</small></div>
+              <div class="sub2" id="o-dca-p"></div>
+            </div>
+          </div>
+          <div class="campo repr">
+            <div class="k">Peor punto de rocío en el salto (valor representativo)</div>
+            <div class="v"><span id="o-pm">–</span> <small>°C</small></div>
+            <div class="sub2" id="o-pm-p"></div>
+          </div>
+          <div class="veredicto" id="ver">
+            <div class="ico" id="ver-ico"></div>
+            <div><p class="tt" id="ver-tt"></p><p class="tx" id="ver-tx"></p></div>
+          </div>
+          <details class="detalle">
+            <summary>Ver detalle del cálculo y las iteraciones</summary>
+            <div class="log" id="log"></div>
+          </details>
+          <p class="nota">Cálculo Peng-Robinson con la composición ingresada (hasta C8). Es el punto de rocío de <b>hidrocarburos</b> (no incluye agua ni congelamiento de reguladoras). La precisión depende de tener bien medida la cola pesada (C6+): si falta, el rocío real puede ser algo mayor.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="pie">Grupo Albanesi — O&amp;M Corporativo · Método Peng-Robinson (1976), kij estándar para N₂/CO₂. Herramienta de apoyo; ante un valor crítico, validar con el punto de rocío medido por TGN.</p>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var ORD=['N2','CO2','C1','C2','C3','iC4','nC4','iC5','nC5','C6','C7','C8'];
+  var ETQ=['N₂','CO₂','C1','C2','C3','iC4','nC4','iC5','nC5','C6','C7','C8'];
+  var Tc=[126.2,304.2,190.6,305.3,369.8,408.1,425.1,460.4,469.7,507.6,540.2,568.7];
+  var Pc=[33.98,73.83,45.99,48.72,42.48,36.48,37.96,33.81,33.70,30.25,27.40,24.90];
+  var W =[0.037,0.224,0.011,0.099,0.152,0.176,0.200,0.227,0.252,0.301,0.350,0.399];
+  var R=0.0831446,N=12,SQ2=Math.sqrt(2),EOS=0;
+  var K=[];for(var i=0;i<N;i++)K.push(new Array(N).fill(0));
+  function setk(a,b,v){var ia=ORD.indexOf(a),ib=ORD.indexOf(b);K[ia][ib]=v;K[ib][ia]=v;}
+  setk('N2','CO2',-0.017);
+  [['C1',0.0278],['C2',0.0407],['C3',0.0763],['iC4',0.0944],['nC4',0.0700],['iC5',0.0867],['nC5',0.0878],['C6',0.1496],['C7',0.1380],['C8',0.10]].forEach(function(p){setk('N2',p[0],p[1]);});
+  [['C1',0.100],['C2',0.130],['C3',0.135],['iC4',0.130],['nC4',0.130],['iC5',0.125],['nC5',0.125],['C6',0.125],['C7',0.120],['C8',0.120]].forEach(function(p){setk('CO2',p[0],p[1]);});
+
+  function cubic(a2,a1,a0){
+    var p=a1-a2*a2/3,q=2*a2*a2*a2/27-a2*a1/3+a0,disc=q*q/4+p*p*p/27,r=[];
+    if(disc>0){var s=Math.sqrt(disc),u=-q/2+s,v=-q/2-s;u=Math.sign(u)*Math.pow(Math.abs(u),1/3);v=Math.sign(v)*Math.pow(Math.abs(v),1/3);r=[u+v-a2/3];}
+    else{var rr=p<0?Math.sqrt(-p*p*p/27):0;if(rr===0)r=[-a2/3];else{var phi=Math.acos(Math.max(-1,Math.min(1,(-q/2)/rr))),m=2*Math.sqrt(-p/3);r=[m*Math.cos(phi/3)-a2/3,m*Math.cos((phi+2*Math.PI)/3)-a2/3,m*Math.cos((phi+4*Math.PI)/3)-a2/3];}}
+    return r;
+  }
+  function phi(T,P,x,phase){
+    EOS++;
+    var a=new Array(N),b=new Array(N),i,j;
+    for(i=0;i<N;i++){var m=0.37464+1.54226*W[i]-0.26992*W[i]*W[i];var al=Math.pow(1+m*(1-Math.sqrt(T/Tc[i])),2);a[i]=0.45724*R*R*Tc[i]*Tc[i]/Pc[i]*al;b[i]=0.07780*R*Tc[i]/Pc[i];}
+    var sa=new Array(N);for(i=0;i<N;i++)sa[i]=Math.sqrt(a[i]);
+    var am=0,bm=0,aij=[];for(i=0;i<N;i++){aij.push(new Array(N));for(j=0;j<N;j++){aij[i][j]=(1-K[i][j])*sa[i]*sa[j];am+=x[i]*x[j]*aij[i][j];}}
+    for(i=0;i<N;i++)bm+=x[i]*b[i];
+    var A=am*P/((R*T)*(R*T)),B=bm*P/(R*T);
+    var roots=cubic(-(1-B),(A-3*B*B-2*B),-(A*B-B*B-B*B*B)).filter(function(z){return z>B;});
+    if(!roots.length)return null;
+    var Z=phase==='V'?Math.max.apply(null,roots):Math.min.apply(null,roots);
+    var out=new Array(N),lt=Math.log((Z+(1+SQ2)*B)/(Z+(1-SQ2)*B));
+    for(i=0;i<N;i++){var sj=0;for(j=0;j<N;j++)sj+=x[j]*aij[i][j];out[i]=Math.exp((b[i]/bm)*(Z-1)-Math.log(Z-B)-A/(2*SQ2*B)*(2*sj/am-b[i]/bm)*lt);}
+    return out;
+  }
+  function dewSum(T,P,z,wantx){
+    var Kv=new Array(N),i,its=0,xx=null;
+    for(i=0;i<N;i++)Kv[i]=(Pc[i]/P)*Math.exp(5.373*(1+W[i])*(1-Tc[i]/T));
+    for(var it=0;it<40;it++){its++;
+      var x=new Array(N),s=0;for(i=0;i<N;i++){x[i]=z[i]/Kv[i];s+=x[i];}for(i=0;i<N;i++)x[i]/=s;xx=x;
+      var pV=phi(T,P,z,'V'),pL=phi(T,P,x,'L');if(!pV||!pL)return null;
+      var conv=true;for(i=0;i<N;i++){var Kn=pL[i]/pV[i];if(Math.abs(Kn/Kv[i]-1)>1e-7)conv=false;Kv[i]=Kn;}
+      if(conv)break;
+    }
+    var triv=0,sum=0;for(i=0;i<N;i++){triv=Math.max(triv,Math.abs(Math.log(Kv[i])));sum+=z[i]/Kv[i];}
+    var o={sum:sum,triv:triv,its:its};if(wantx)o.x=xx;return o;
+  }
+  function dewPoint(P,z,detail){
+    var pT=null,pF=null,T=80.0,steps=0,ssi=0;
+    while(T>-120){steps++;
+      var r=dewSum(T+273.15,P,z);if(r)ssi+=r.its;
+      if(r&&r.triv>0.5){var f=r.sum-1;
+        if(pF!==null&&pF*f<0){var lo=T,hi=pT,bis=0;
+          for(var k=0;k<60;k++){bis++;var mid=(lo+hi)/2,rm=dewSum(mid+273.15,P,z);if(!rm||rm.triv<0.5)break;ssi+=rm.its;var fm=rm.sum-1,rl=dewSum(lo+273.15,P,z),fl=rl.sum-1;ssi+=rl.its;if(fl*fm<=0)hi=mid;else lo=mid;}
+          var Tdew=(lo+hi)/2;
+          if(detail){detail.steps=steps;detail.ssi=ssi;detail.bis=bis;}
+          return Tdew;
+        }
+        pT=T;pF=f;
+      } else {pT=null;pF=null;}
+      T-=2.0;
+    }
+    if(detail){detail.steps=steps;detail.ssi=ssi;}
+    return null;
+  }
+
+  var ICO={ok:'<svg viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 7"/></svg>',warn:'<svg viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 4l-7 12a2 2 0 0 0 1.7 3h14a2 2 0 0 0 1.7-3l-7-12a2 2 0 0 0-3.4 0z"/></svg>',bad:'<svg viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-1 5-5 6-5 11a5 5 0 0 0 10 0c0-2-1-3-2-5-1 1-1 2-2 2 0-3-1-4-1-8z"/></svg>'};
+  function comp(){var o={};ORD.forEach(function(c){o[c]=parseFloat($(c).value)||0;});return o;}
+  function sumComp(){var s=0;ORD.forEach(function(c){s+=parseFloat($(c).value)||0;});return s;}
+  function refreshSuma(){var s=sumComp();$('suma').textContent=s.toFixed(2);var ok=Math.abs(s-100)<0.05;$('suma-msg').textContent=ok?'✓':'(se normaliza al calcular)';$('suma-msg').style.color=ok?'var(--ok)':'var(--tinta3)';}
+  ORD.forEach(function(c){$(c).addEventListener('input',refreshSuma);});
+  $('btn-norm').addEventListener('click',function(){var s=sumComp();if(s<=0)return;ORD.forEach(function(c){$(c).value=((parseFloat($(c).value)||0)/s*100).toFixed(3);});refreshSuma();});
+  function setVer(state,tt,tx){var v=$('ver'),ic=$('ver-ico');var map={ok:['var(--ok-bg)','var(--ok-bd)','#A6E0C9',ICO.ok,'var(--ok-tx)'],warn:['var(--warn-bg)','var(--warn-bd)','#F7CE86',ICO.warn,'var(--warn-tx)'],bad:['var(--bad-bg)','var(--bad-bd)','#F4A6A6',ICO.bad,'var(--bad-tx)']};var m=map[state];v.style.background=m[0];v.style.borderColor=m[1];ic.style.background=m[2];ic.innerHTML=m[3];$('ver-tt').style.color=m[4];$('ver-tx').style.color=m[4];$('ver-tt').textContent=tt;$('ver-tx').textContent=tx;}
+
+  function run(){
+    var z0=comp(),sIng=0;ORD.forEach(function(c){sIng+=z0[c];});
+    if(sIng<=0){alert('Cargá la composición del gas.');return;}
+    var z=ORD.map(function(c){return z0[c]/sIng;});
+    var Pin=parseFloat($('Pin').value)||0,Pcam=parseFloat($('Pcam').value)||0;
+    var Top=parseFloat($('Top').value),Marg=parseFloat($('Marg').value);
+    if(Pin<=0||Pcam<=0){alert('Ingresá presiones válidas.');return;}
+    var Plo=Math.min(Pin,Pcam),Phi=Math.max(Pin,Pcam);
+    $('res-vacio').style.display='none';$('res').style.display='block';
+    $('o-din').textContent='…';$('o-dca').textContent='…';$('o-pm').textContent='…';
+    setVer('warn','Calculando…','Resolviendo la ecuación de estado.');
+    setTimeout(function(){
+      EOS=0;
+      var dIn={},dCa={};
+      var Tin=dewPoint(Pin,z,dIn), Tca=dewPoint(Pcam,z,dCa);
+      // barrido del salto para el peor caso (incluye extremos)
+      var log=['Peng-Robinson (1976) · kij estándar N₂/CO₂','Composición normalizada (suma ingresada '+sIng.toFixed(2)+' % → 100 %).',''];
+      log.push('Rocío @ '+Pin+' bar (ingreso): '+(Tin===null?'< -120 °C':Tin.toFixed(1)+' °C')+'  ['+dIn.steps+' pasos de T, '+dIn.ssi+' iter. EOS]');
+      log.push('Rocío @ '+Pcam+' bar (cámara): '+(Tca===null?'< -120 °C':Tca.toFixed(1)+' °C')+'  ['+dCa.steps+' pasos de T, '+dCa.ssi+' iter. EOS]');
+      log.push('');
+      log.push('Barrido del salto ['+Plo+' → '+Phi+' bar] para el peor rocío:');
+      var pmT=-999,pmP=0; var endpts=[[Pin,Tin],[Pcam,Tca]];
+      endpts.forEach(function(e){if(e[1]!==null&&e[1]>pmT){pmT=e[1];pmP=e[0];}});
+      var step=Math.max(2,Math.round((Phi-Plo)/8));
+      for(var P=Plo;P<=Phi+0.001;P+=step){
+        var d=dewPoint(P,z); log.push('   P='+P.toFixed(0)+' bar → '+(d===null?'sin cond.':d.toFixed(1)+' °C'));
+        if(d!==null&&d>pmT){pmT=d;pmP=P;}
+      }
+      // refinar alrededor del peor
+      for(var P2=Math.max(Plo,pmP-step);P2<=Math.min(Phi,pmP+step)+0.001;P2+=Math.max(1,Math.round(step/3))){
+        var d2=dewPoint(P2,z); if(d2!==null&&d2>pmT){pmT=d2;pmP=P2;}
+      }
+      // composición de la primera gota en el peor punto
+      var xinfo='';
+      if(pmT>-998){
+        var rr=dewSum(pmT+273.15,pmP,z,true);
+        if(rr&&rr.x){
+          var pares=ORD.map(function(c,idx){return [ETQ[idx],rr.x[idx]*100];}).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+          xinfo=pares.map(function(p){return p[0]+' '+p[1].toFixed(1)+'%';}).join(', ');
+        }
+      }
+      log.push('');
+      log.push('Peor rocío del salto: '+(pmT>-998?pmT.toFixed(1)+' °C a '+pmP.toFixed(0)+' bar':'no condensa')+'.');
+      if(xinfo) log.push('Primera gota (líquido incipiente) ≈ '+xinfo+'  (se concentra en pesados).');
+      log.push('Total de evaluaciones de la EOS en este cálculo: '+EOS+'.');
+      $('log').textContent=log.join('\n');
+
+      $('o-din').textContent=(Tin===null?'< -120':Tin.toFixed(1));$('o-din-p').textContent='a '+Pin+' bar';
+      $('o-dca').textContent=(Tca===null?'< -120':Tca.toFixed(1));$('o-dca-p').textContent='a '+Pcam+' bar';
+      if(pmT>-998){$('o-pm').textContent=pmT.toFixed(1);$('o-pm-p').textContent='ocurre a '+pmP.toFixed(0)+' bar';}
+      else{$('o-pm').textContent='< -120';$('o-pm-p').textContent='no condensa en el salto';}
+
+      if(pmT<=-998){
+        setVer('ok','Sin riesgo de condensación','En todo el salto de presión el gas no llega a condensar en el rango analizado.');
+      } else if(isNaN(Top)){
+        setVer('warn','Falta la temperatura del gas','El peor rocío del salto es '+pmT.toFixed(1)+' °C (a '+pmP.toFixed(0)+' bar). Cargá la temperatura del gas para saber si hay riesgo.');
+      } else {
+        var margen=Top-pmT;
+        if(margen<0){
+          setVer('bad','Riesgo: el gas condensa','El peor punto de rocío del salto es '+pmT.toFixed(1)+' °C (a '+pmP.toFixed(0)+' bar) y el gas está a '+Top+' °C, es decir '+Math.abs(margen).toFixed(1)+' °C por debajo. Se forman hidrocarburos líquidos que tapan filtros e inyectores y pueden dañar la turbina. Conviene calentar el gas.');
+        } else if(margen<Marg){
+          setVer('warn','Margen insuficiente','El gas ('+Top+' °C) está sólo '+margen.toFixed(1)+' °C por encima del peor rocío del salto ('+pmT.toFixed(1)+' °C a '+pmP.toFixed(0)+' bar). El fabricante pide '+Marg+' °C. Conviene calentar el gas.');
+        } else {
+          setVer('ok','Gas seco, margen OK','El gas ('+Top+' °C) está '+margen.toFixed(1)+' °C por encima del peor rocío del salto ('+pmT.toFixed(1)+' °C a '+pmP.toFixed(0)+' bar), cumpliendo el margen de '+Marg+' °C. No hay riesgo de condensación.');
+        }
+      }
+    },30);
+  }
+  $('btn-calc').addEventListener('click',run);
+  refreshSuma();
+})();
+</script>
+</body>
+</html>
